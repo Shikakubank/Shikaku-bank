@@ -15,9 +15,11 @@ env/
 .env
 
 # SQLite
-*.db
 *.sqlite
 *.sqlite3
+*.db
+# ただしシードデータDBはバージョン管理対象
+!data/courses.db
 
 # 環境変数
 .env
