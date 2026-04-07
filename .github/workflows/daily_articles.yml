@@ -1,0 +1,65 @@
+name: Daily Article Generation
+
+on:
+  schedule:
+    - cron: "0 1 * * *"  # 毎日 1:00 UTC（日本時間 10:00）
+  workflow_dispatch:       # 手動実行も可能
+    inputs:
+      keyword_id:
+        description: "生成するキーワードID（空欄で自動選択）"
+        required: false
+        default: ""
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Generate article
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          if [ -n "${{ github.event.inputs.keyword_id }}" ]; then
+            python generators/gen_article.py --id ${{ github.event.inputs.keyword_id }}
+          else
+            python generators/gen_article.py
+          fi
+
+      - name: Check for new article
+        id: changes
+        run: |
+          git diff --quiet articles/ \
+            && git ls-files --others --exclude-standard articles/ | grep -q "." \
+            && echo "changed=true" >> "$GITHUB_OUTPUT" \
+            || git diff --quiet articles/ \
+            && echo "changed=false" >> "$GITHUB_OUTPUT" \
+            || echo "changed=true" >> "$GITHUB_OUTPUT"
+
+      - name: Commit and push
+        if: steps.changes.outputs.changed != 'false'
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add articles/
+          git diff --staged --quiet || git commit -m "article: auto-generated $(date +'%Y-%m-%d')"
+          git push
+        # push により deploy.yml が起動し Cloudflare Pages にデプロイされる
+
+      - name: No new article
+        if: steps.changes.outputs.changed == 'false'
+        run: echo "未執筆のキーワードがないため生成をスキップしました。"

@@ -1,0 +1,50 @@
+name: Weekly Data Refresh
+
+on:
+  schedule:
+    - cron: "0 0 * * 1"  # 毎週月曜 0:00 UTC（日本時間 月曜 9:00）
+  workflow_dispatch:       # 手動実行も可能
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Refresh course data
+        run: python data/fetch_courses.py --seed
+
+      - name: Check for changes
+        id: changes
+        run: |
+          git diff --quiet data/courses.db \
+            && echo "changed=false" >> "$GITHUB_OUTPUT" \
+            || echo "changed=true"  >> "$GITHUB_OUTPUT"
+
+      - name: Commit and push
+        if: steps.changes.outputs.changed == 'true'
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add data/courses.db
+          git commit -m "data: weekly refresh $(date +'%Y-%m-%d')"
+          git push
+        # push により deploy.yml が起動し Cloudflare Pages にデプロイされる
+
+      - name: No changes
+        if: steps.changes.outputs.changed == 'false'
+        run: echo "データに変更なし。デプロイをスキップします。"

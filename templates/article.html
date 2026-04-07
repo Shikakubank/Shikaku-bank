@@ -1,0 +1,123 @@
+{% extends "base.html" %}
+
+{% block title %}{{ article.title }}｜資格バンク{% endblock %}
+{% block description %}{{ article.excerpt }}{% endblock %}
+
+{% block ogp %}
+<meta property="og:type"        content="article">
+<meta property="og:title"       content="{{ article.title }}｜資格バンク">
+<meta property="og:description" content="{{ article.excerpt }}">
+<meta property="og:url"         content="{{ site_url }}/articles/{{ article.slug }}/">
+<meta property="og:image"       content="{{ site_url }}/static/images/og-default.png">
+<meta property="og:site_name"   content="資格バンク">
+<meta property="og:locale"      content="ja_JP">
+<meta name="twitter:card"       content="summary_large_image">
+<meta property="article:published_time" content="{{ article.published_at }}">
+{% endblock %}
+
+{% block jsonld %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "headline": "{{ article.title }}",
+  "description": "{{ article.excerpt }}",
+  "datePublished": "{{ article.published_at }}",
+  "url": "{{ site_url }}/articles/{{ article.slug }}/",
+  "publisher": {
+    "@type": "Organization",
+    "name": "資格バンク",
+    "url": "{{ site_url }}"
+  }
+}
+</script>
+{% endblock %}
+
+{% block content %}
+<div class="max-w-3xl mx-auto px-4 py-8">
+
+  {# ── 記事ヘッダー ── #}
+  <div class="mb-8">
+    <div class="flex items-center gap-2 mb-4">
+      <span class="bg-primary-100 text-primary-700 text-xs font-semibold px-2.5 py-1 rounded-full">
+        {{ article.category }}
+      </span>
+      <span class="text-xs text-gray-400">{{ article.published_at }}</span>
+    </div>
+    <h1 class="text-2xl sm:text-3xl font-black text-gray-900 leading-tight mb-4">
+      {{ article.title }}
+    </h1>
+    {% if article.excerpt %}
+    <p class="text-sm text-gray-500 leading-relaxed bg-gray-50 rounded-xl p-4 border-l-4 border-primary-400">
+      {{ article.excerpt }}
+    </p>
+    {% endif %}
+  </div>
+
+  {# ── 記事本文 ── #}
+  <article class="prose prose-sm sm:prose max-w-none
+                  prose-headings:font-bold prose-headings:text-gray-900
+                  prose-h2:text-xl prose-h2:mt-8 prose-h2:mb-4
+                  prose-h3:text-base prose-h3:mt-6 prose-h3:mb-3
+                  prose-p:text-gray-700 prose-p:leading-relaxed
+                  prose-a:text-primary-600 prose-a:no-underline hover:prose-a:underline
+                  prose-strong:text-gray-900
+                  prose-ul:text-gray-700 prose-ol:text-gray-700
+                  prose-li:my-1
+                  prose-table:text-sm prose-th:bg-primary-50 prose-th:text-primary-800
+                  prose-blockquote:border-primary-400 prose-blockquote:text-gray-600">
+    {{ article.content_html | safe }}
+  </article>
+
+  {# ── 記事フッター ── #}
+  <div class="mt-12 pt-6 border-t border-gray-200">
+    <p class="text-xs text-gray-400 mb-6">
+      ※ 掲載情報は執筆時点のものです。受講料・給付金の最新情報は各スクール公式サイトでご確認ください。
+    </p>
+
+    {# 関連リンク #}
+    <div class="bg-primary-50 rounded-2xl p-5">
+      <p class="text-sm font-bold text-primary-800 mb-3">🔍 給付金対象講座を探す</p>
+      <div class="flex flex-wrap gap-2">
+        <a href="/search/" class="bg-white border border-primary-200 text-primary-700 text-xs font-medium px-3 py-1.5 rounded-lg hover:bg-primary-100 transition-colors">
+          すべての講座を検索
+        </a>
+        <a href="/category/it/" class="bg-white border border-primary-200 text-primary-700 text-xs font-medium px-3 py-1.5 rounded-lg hover:bg-primary-100 transition-colors">
+          💻 IT・プログラミング
+        </a>
+        <a href="/category/accounting/" class="bg-white border border-primary-200 text-primary-700 text-xs font-medium px-3 py-1.5 rounded-lg hover:bg-primary-100 transition-colors">
+          📊 会計・簿記
+        </a>
+        <a href="/category/estate/" class="bg-white border border-primary-200 text-primary-700 text-xs font-medium px-3 py-1.5 rounded-lg hover:bg-primary-100 transition-colors">
+          🏠 不動産・宅建
+        </a>
+        <a href="/about-kyufu/" class="bg-white border border-primary-200 text-primary-700 text-xs font-medium px-3 py-1.5 rounded-lg hover:bg-primary-100 transition-colors">
+          💡 給付金の仕組みを知る
+        </a>
+      </div>
+    </div>
+  </div>
+
+  {# ── 関連記事 ── #}
+  {% if related_articles %}
+  <section class="mt-10">
+    <h2 class="text-base font-bold text-gray-900 mb-4">関連記事</h2>
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      {% for ra in related_articles[:4] %}
+      <a href="/articles/{{ ra.slug }}/"
+         class="group flex gap-3 bg-white rounded-xl border border-gray-100 p-4
+                hover:shadow-md transition-all duration-200">
+        <span class="text-2xl shrink-0">{{ ra.icon | default('📝') }}</span>
+        <div>
+          <p class="text-xs text-gray-400 mb-1">{{ ra.category }}</p>
+          <h3 class="text-sm font-bold text-gray-900 line-clamp-2 group-hover:text-primary-600 transition-colors">
+            {{ ra.title }}
+          </h3>
+        </div>
+      </a>
+      {% endfor %}
+    </div>
+  </section>
+  {% endif %}
+</div>
+{% endblock %}

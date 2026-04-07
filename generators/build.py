@@ -18,6 +18,7 @@
 import argparse
 import json
 import os
+import re
 import shutil
 import sqlite3
 import sys
@@ -36,12 +37,19 @@ except ImportError:
     print("Jinja2が見つかりません。pip install Jinja2 を実行してください。")
     sys.exit(1)
 
+try:
+    import markdown as md_lib
+except ImportError:
+    print("Markdownが見つかりません。pip install Markdown を実行してください。")
+    sys.exit(1)
+
 # ── パス定義 ─────────────────────────────────────────────────
-ROOT      = Path(__file__).parent.parent
-DB_PATH   = ROOT / "data" / "courses.db"
-TEMPLATES = ROOT / "templates"
-STATIC    = ROOT / "static"
-OUTPUT    = ROOT / "output"
+ROOT         = Path(__file__).parent.parent
+DB_PATH      = ROOT / "data" / "courses.db"
+TEMPLATES    = ROOT / "templates"
+STATIC       = ROOT / "static"
+OUTPUT       = ROOT / "output"
+ARTICLES_DIR = ROOT / "articles"
 
 SITE_URL = os.environ.get("SITE_URL", "https://shikaku-bank.com")
 
@@ -261,8 +269,49 @@ def write_page(rel_path: str, html: str) -> None:
     print(f"  ✓  /{rel_path}")
 
 
+# ── 記事読み込み ──────────────────────────────────────────────
+def parse_frontmatter(text: str) -> tuple[dict, str]:
+    """YAMLフロントマター（---区切り）を解析してメタデータと本文を返す"""
+    m = re.match(r"^---\s*\n(.*?)\n---\s*\n(.*)", text, re.DOTALL)
+    if not m:
+        return {}, text
+    meta: dict = {}
+    for line in m.group(1).splitlines():
+        if ":" in line:
+            key, _, val = line.partition(":")
+            meta[key.strip()] = val.strip()
+    return meta, m.group(2)
+
+
+def load_articles() -> list[dict]:
+    """articles/ 配下の .md ファイルを読み込み、公開日降順で返す"""
+    if not ARTICLES_DIR.exists():
+        return []
+    articles = []
+    for md_path in sorted(ARTICLES_DIR.glob("*.md"), reverse=True):
+        if md_path.name == ".gitkeep":
+            continue
+        text = md_path.read_text(encoding="utf-8")
+        meta, body = parse_frontmatter(text)
+        if not meta.get("title") or not meta.get("slug"):
+            continue
+        content_html = md_lib.markdown(
+            body,
+            extensions=["extra", "toc", "tables"],
+        )
+        articles.append({
+            **meta,
+            "keyword_id":   int(meta.get("keyword_id", 0)),
+            "content_html": content_html,
+            "body":         body,
+        })
+    # published_at 降順でソート
+    articles.sort(key=lambda a: a.get("published_at", ""), reverse=True)
+    return articles
+
+
 # ── トップページ ──────────────────────────────────────────────
-def build_top(env: Environment, conn: sqlite3.Connection) -> list[str]:
+def build_top(env: Environment, conn: sqlite3.Connection, articles: list[dict]) -> list[str]:
     pickup = fetch_courses(conn)[:6]
     ctx = base_ctx()
     ctx.update({
@@ -274,11 +323,59 @@ def build_top(env: Environment, conn: sqlite3.Connection) -> list[str]:
         "fields":          TOP_FIELDS,
         "areas":           NAV_AREAS,
         "pickup_courses":  pickup,
-        "latest_articles": [],
+        "latest_articles": articles[:6],
     })
     html = env.get_template("top.html").render(**ctx)
     write_page("index.html", html)
     return ["/"]
+
+
+# ── 記事ページ ────────────────────────────────────────────────
+def build_article_pages(env: Environment, articles: list[dict]) -> list[str]:
+    pages = []
+
+    # 記事一覧
+    ctx = base_ctx()
+    ctx.update({
+        "page": {
+            "title":       "コラム一覧｜教育訓練給付金・資格取得ガイド｜資格バンク",
+            "description": "教育訓練給付金の使い方・おすすめ資格スクール比較など役立つコラムを掲載。",
+            "canonical":   "/articles/",
+        },
+        "articles": articles,
+        "breadcrumbs": [
+            {"name": "トップ",    "url": "/"},
+            {"name": "コラム一覧", "url": "/articles/"},
+        ],
+    })
+    html = env.get_template("articles.html").render(**ctx)
+    write_page("articles/index.html", html)
+    pages.append("/articles/")
+
+    # 記事詳細
+    for article in articles:
+        slug = article["slug"]
+        related = [a for a in articles if a["category"] == article["category"] and a["slug"] != slug][:4]
+        ctx = base_ctx()
+        ctx.update({
+            "page": {
+                "title":       f"{article['title']}｜資格バンク",
+                "description": article.get("excerpt", ""),
+                "canonical":   f"/articles/{slug}/",
+            },
+            "article":          article,
+            "related_articles": related,
+            "breadcrumbs": [
+                {"name": "トップ",    "url": "/"},
+                {"name": "コラム一覧", "url": "/articles/"},
+                {"name": article["title"], "url": f"/articles/{slug}/"},
+            ],
+        })
+        html = env.get_template("article.html").render(**ctx)
+        write_page(f"articles/{slug}/index.html", html)
+        pages.append(f"/articles/{slug}/")
+
+    return pages
 
 
 # ── カテゴリページ ────────────────────────────────────────────
@@ -417,7 +514,12 @@ def build_sitemap(pages: list[str]) -> None:
     for path in pages:
         # トップは changefreq: daily、その他は weekly
         freq  = "daily"  if path == "/" else "weekly"
-        priority = "1.0" if path == "/" else ("0.8" if path.startswith("/category/") else "0.6")
+        priority = (
+            "1.0" if path == "/" else
+            "0.8" if path.startswith("/category/") else
+            "0.7" if path.startswith("/articles/") and path != "/articles/" else
+            "0.6"
+        )
         urls.append(
             f"  <url>\n"
             f"    <loc>{SITE_URL}{path}</loc>\n"
@@ -465,24 +567,29 @@ def main() -> None:
 
     try:
         all_pages: list[str] = []
+        articles = load_articles()
+        print(f"[articles] {len(articles)} 件の記事を読み込みました")
 
         if args.top:
             print("\n[top] トップページを生成中...")
-            all_pages += build_top(env, conn)
+            all_pages += build_top(env, conn, articles)
         else:
-            print("\n[1/5] トップページ")
-            all_pages += build_top(env, conn)
+            print("\n[1/6] トップページ")
+            all_pages += build_top(env, conn, articles)
 
-            print("\n[2/5] カテゴリページ")
+            print("\n[2/6] カテゴリページ")
             all_pages += build_categories(env, conn)
 
-            print("\n[3/5] 講座詳細ページ")
+            print("\n[3/6] 講座詳細ページ")
             all_pages += build_courses(env, conn)
 
-            print("\n[4/5] 検索ページ")
+            print("\n[4/6] 検索ページ")
             all_pages += build_search(env, conn)
 
-            print("\n[5/5] 静的ファイル・サイトマップ")
+            print("\n[5/6] 記事ページ")
+            all_pages += build_article_pages(env, articles)
+
+            print("\n[6/6] 静的ファイル・サイトマップ")
             copy_static()
             build_sitemap(all_pages)
             write_redirects()
