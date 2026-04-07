@@ -3,14 +3,14 @@
 {# ════════════════════════════════════════
    SEO・メタ
 ════════════════════════════════════════ #}
-{% block title %}資格バンク｜補助金で最大70%OFF！教育訓練給付金対象の資格・スキルアップ講座を比較{% endblock %}
+{% block title %}資格バンク｜給付金で最大70%OFF！教育訓練給付金対象の資格・スキルアップ講座を比較{% endblock %}
 
-{% block description %}教育訓練給付金を使えば受講料が最大70%OFF。IT・語学・会計・医療など15,000件以上の対象講座を比較検索。あなたにぴったりの講座が見つかります。{% endblock %}
+{% block description %}教育訓練給付金を使えば受講料が最大70%OFF。IT・語学・会計・医療など給付金対象講座を比較検索。あなたにぴったりの講座が見つかります。{% endblock %}
 
 {% block ogp %}
 <meta property="og:type"        content="website">
-<meta property="og:title"       content="資格バンク｜補助金で最大70%OFF！給付金対象の資格・スキルアップ講座を比較">
-<meta property="og:description" content="教育訓練給付金を使えば受講料が最大70%OFF。IT・語学・会計・医療など15,000件以上の対象講座を比較検索。">
+<meta property="og:title"       content="資格バンク｜給付金で最大70%OFF！給付金対象の資格・スキルアップ講座を比較">
+<meta property="og:description" content="教育訓練給付金を使えば受講料が最大70%OFF。IT・語学・会計・医療など給付金対象講座を比較検索。">
 <meta property="og:url"         content="{{ site_url }}/">
 <meta property="og:image"       content="{{ site_url }}/static/images/og-top.png">
 <meta property="og:site_name"   content="資格バンク">
@@ -80,7 +80,7 @@
       {# バッジ #}
       <div class="inline-flex items-center gap-2 bg-white/15 backdrop-blur-sm border border-white/20 text-white text-xs font-semibold px-4 py-1.5 rounded-full mb-5">
         <span class="w-2 h-2 bg-accent rounded-full animate-pulse"></span>
-        15,000件以上の給付金対象講座を掲載
+        教育訓練給付金の対象講座を掲載
       </div>
 
       {# メインキャッチ #}
@@ -129,8 +129,8 @@
     {# ── 統計バー ── #}
     <div class="grid grid-cols-3 gap-3 max-w-lg mx-auto mt-8 text-center">
       <div class="text-white">
-        <p class="text-2xl sm:text-3xl font-black">15,000<span class="text-base font-semibold">件+</span></p>
-        <p class="text-xs text-primary-200 mt-0.5">給付金対象講座</p>
+        <p class="text-2xl sm:text-3xl font-black">{{ total_courses }}<span class="text-base font-semibold">件</span></p>
+        <p class="text-xs text-primary-200 mt-0.5">掲載中の対象講座</p>
       </div>
       <div class="text-white border-x border-white/20">
         <p class="text-2xl sm:text-3xl font-black">最大<span class="text-accent-light">70%</span></p>
@@ -161,20 +161,16 @@
   </div>
 
   <div class="grid grid-cols-3 sm:grid-cols-3 md:grid-cols-6 gap-3 sm:gap-4">
-    {% set popular_cats = [
-      {"icon": "💻", "name": "IT・プログラミング", "slug": "it",       "count": 3200, "color": "bg-blue-50 hover:bg-blue-100 border-blue-100"},
-      {"icon": "🌍", "name": "語学・英会話",       "slug": "english",  "count": 1800, "color": "bg-green-50 hover:bg-green-100 border-green-100"},
-      {"icon": "📊", "name": "会計・簿記",          "slug": "accounting","count": 2100, "color": "bg-yellow-50 hover:bg-yellow-100 border-yellow-100"},
-      {"icon": "🏥", "name": "医療・介護",          "slug": "medical",  "count": 1500, "color": "bg-red-50 hover:bg-red-100 border-red-100"},
-      {"icon": "🏠", "name": "不動産・宅建",        "slug": "estate",   "count": 900,  "color": "bg-orange-50 hover:bg-orange-100 border-orange-100"},
-      {"icon": "🎨", "name": "デザイン・クリエイティブ", "slug": "design", "count": 700, "color": "bg-purple-50 hover:bg-purple-100 border-purple-100"},
-    ] %}
     {% for cat in popular_cats %}
     <a href="/category/{{ cat.slug }}/"
        class="group flex flex-col items-center text-center px-2 py-4 rounded-2xl border {{ cat.color }} transition-all duration-200 hover:shadow-md hover:-translate-y-0.5">
       <span class="text-3xl sm:text-4xl mb-2 group-hover:scale-110 transition-transform duration-200">{{ cat.icon }}</span>
       <p class="text-xs sm:text-sm font-semibold text-gray-800 leading-tight">{{ cat.name }}</p>
-      <p class="text-xs text-gray-400 mt-1">{{ cat.count | number_format }}件</p>
+      {% if cat.count > 0 %}
+      <p class="text-xs text-gray-400 mt-1">{{ cat.count }}件</p>
+      {% else %}
+      <p class="text-xs text-gray-400 mt-1">準備中</p>
+      {% endif %}
     </a>
     {% endfor %}
   </div>

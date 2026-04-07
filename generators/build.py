@@ -316,18 +316,63 @@ def load_articles() -> list[dict]:
 
 # ── トップページ ──────────────────────────────────────────────
 def build_top(env: Environment, conn: sqlite3.Connection, articles: list[dict]) -> list[str]:
-    pickup = fetch_courses(conn)[:6]
+    all_courses = fetch_courses(conn)
+    total_courses = len(all_courses)
+    pickup = all_courses[:6]
+
+    # カテゴリ別の実件数を集計
+    cat_count: dict[str, int] = {cat["slug"]: 0 for cat in CATEGORIES}
+    for c in all_courses:
+        slug = FIELD_TO_CATEGORY.get(c["field"], "")
+        if slug in cat_count:
+            cat_count[slug] += 1
+
+    popular_cats = [
+        {
+            "icon":  "💻", "name": "IT・プログラミング", "slug": "it",
+            "count": cat_count.get("it", 0),
+            "color": "bg-blue-50 hover:bg-blue-100 border-blue-100",
+        },
+        {
+            "icon":  "🌍", "name": "語学・英会話", "slug": "english",
+            "count": cat_count.get("english", 0),
+            "color": "bg-green-50 hover:bg-green-100 border-green-100",
+        },
+        {
+            "icon":  "📊", "name": "会計・簿記", "slug": "accounting",
+            "count": cat_count.get("accounting", 0),
+            "color": "bg-yellow-50 hover:bg-yellow-100 border-yellow-100",
+        },
+        {
+            "icon":  "🏥", "name": "医療・介護", "slug": "medical",
+            "count": cat_count.get("medical", 0),
+            "color": "bg-red-50 hover:bg-red-100 border-red-100",
+        },
+        {
+            "icon":  "🏠", "name": "不動産・宅建", "slug": "estate",
+            "count": cat_count.get("estate", 0),
+            "color": "bg-orange-50 hover:bg-orange-100 border-orange-100",
+        },
+        {
+            "icon":  "🎨", "name": "デザイン・クリエイティブ", "slug": "design",
+            "count": cat_count.get("design", 0),
+            "color": "bg-purple-50 hover:bg-purple-100 border-purple-100",
+        },
+    ]
+
     ctx = base_ctx()
     ctx.update({
         "page": {
-            "title":       "資格バンク｜補助金で最大70%OFF！給付金対象の資格・スキルアップ講座を比較",
-            "description": "教育訓練給付金を使えば受講料が最大70%OFF。IT・語学・会計・医療など講座を比較検索。",
+            "title":       "資格バンク｜給付金で最大70%OFF！教育訓練給付金対象の資格・スキルアップ講座を比較",
+            "description": f"教育訓練給付金を使えば受講料が最大70%OFF。IT・語学・会計・医療など給付金対象講座を比較検索。あなたにぴったりの講座が見つかります。",
             "canonical":   "/",
         },
         "fields":          TOP_FIELDS,
         "areas":           NAV_AREAS,
         "pickup_courses":  pickup,
         "latest_articles": articles[:6],
+        "total_courses":   total_courses,
+        "popular_cats":    popular_cats,
     })
     html = env.get_template("top.html").render(**ctx)
     write_page("index.html", html)
