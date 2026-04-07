@@ -7,12 +7,12 @@
 } %}
 
 {% block title %}{{ course.name }}｜{{ school.name }}【給付金で{{ course.benefit_rate }}%OFF】｜資格バンク{% endblock %}
-{% block description %}{{ school.name }}「{{ course.name }}」の詳細。受講料¥{{ "{:,}".format(course.price) }}が教育訓練給付金で実質¥{{ "{:,}".format(course.price_after_benefit) }}〜。{{ course.field }}分野・{{ course.format }}・{{ course.duration }}。{% endblock %}
+{% block description %}{{ school.name }}「{{ course.name }}」の詳細。{% if course.price %}受講料¥{{ "{:,}".format(course.price) }}が教育訓練給付金で実質¥{{ "{:,}".format(course.price_after_benefit) }}〜。{% endif %}{{ course.field }}分野・{{ course.format }}・{{ course.duration }}。{% endblock %}
 
 {% block ogp %}
 <meta property="og:type"        content="article">
 <meta property="og:title"       content="{{ course.name }}｜{{ school.name }}【{{ course.benefit_rate }}%OFF】">
-<meta property="og:description" content="受講料¥{{ "{:,}".format(course.price) }}が給付金で実質¥{{ "{:,}".format(course.price_after_benefit) }}〜。">
+<meta property="og:description" content="{% if course.price %}受講料¥{{ "{:,}".format(course.price) }}が給付金で実質¥{{ "{:,}".format(course.price_after_benefit) }}〜。{% else %}{{ school.name }}の給付金{{ course.benefit_rate }}%OFF対象講座。{% endif %}">
 <meta property="og:url"         content="{{ site_url }}/course/{{ course.id }}/">
 <meta property="og:image"       content="{{ site_url }}/static/images/og-default.png">
 <meta property="og:site_name"   content="資格バンク">
@@ -70,6 +70,7 @@
     {# 料金ブロック #}
     <div class="p-6 border-b border-gray-100">
       <div class="flex flex-col sm:flex-row sm:items-end gap-4">
+        {% if course.price %}
         <div class="flex-1">
           <p class="text-xs text-gray-400 mb-1">通常受講料</p>
           <p class="text-2xl font-black text-gray-400 line-through">¥{{ "{:,}".format(course.price) }}</p>
@@ -81,6 +82,13 @@
             ¥{{ "{:,}".format(course.price_after_benefit) }}<span class="text-lg font-normal text-gray-500">〜</span>
           </p>
         </div>
+        {% else %}
+        <div class="flex-1">
+          <p class="text-xs text-gray-400 mb-1">受講料</p>
+          <p class="text-lg font-medium text-gray-500">各施設へお問い合わせください</p>
+          <p class="text-xs text-gray-400 mt-1">※ 給付金適用で最大{{ course.benefit_rate }}%OFF</p>
+        </div>
+        {% endif %}
         <div class="shrink-0">
           <div class="bg-accent/10 text-accent font-black text-2xl px-5 py-3 rounded-2xl text-center">
             {{ course.benefit_rate }}%<span class="text-base font-semibold">OFF</span>
@@ -149,6 +157,7 @@
   {# ── 給付金の仕組み ── #}
   <div class="bg-white rounded-2xl border border-gray-100 p-6 mb-6">
     <h2 class="text-base font-bold text-gray-900 mb-4">この講座で受け取れる給付金の目安</h2>
+    {% if course.price %}
     <div class="grid grid-cols-3 gap-3 text-center text-sm">
       <div>
         <p class="text-xs text-gray-500 mb-1">受講料</p>
@@ -165,6 +174,9 @@
         <p class="font-black text-accent">¥{{ "{:,}".format(course.price_after_benefit) }}</p>
       </div>
     </div>
+    {% else %}
+    <p class="text-sm text-gray-500 text-center py-2">受講料は各施設にお問い合わせください。給付金適用で最大{{ course.benefit_rate }}%OFFになります。</p>
+    {% endif %}
     <p class="text-xs text-gray-400 mt-4 text-center">
       ※給付金を受け取るには雇用保険の加入期間等の要件があります。
       <a href="/about-kyufu/" class="text-primary-600 hover:underline">詳しくはこちら</a>

@@ -221,8 +221,14 @@
         <div class="border-t border-gray-100 pt-3 mt-auto">
           <div class="flex items-baseline justify-between">
             <div>
+              {% if course.price %}
               <p class="text-xs text-gray-400 line-through">¥{{ "{:,}".format(course.price) }}</p>
+              {% endif %}
+              {% if course.price_after_benefit %}
               <p class="text-xl font-black text-accent">¥{{ "{:,}".format(course.price_after_benefit) }}<span class="text-xs font-normal text-gray-500">〜（税込）</span></p>
+              {% else %}
+              <p class="text-sm font-medium text-gray-400">要お問い合わせ</p>
+              {% endif %}
             </div>
             <span class="bg-accent/10 text-accent font-bold text-sm px-2.5 py-1 rounded-full">
               {{ course.benefit_rate }}%OFF

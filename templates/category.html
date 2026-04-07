@@ -216,16 +216,15 @@
   function applyFilters() {
     const cards = document.querySelectorAll('.course-card');
     let visible = 0;
-    cards.forEach(card => {
-      const b = card.dataset.benefit;
-      const f = card.dataset.format;
-      const matchBenefit = currentBenefit === 'all' || b === currentBenefit;
-      const matchFormat  = currentFormat  === 'all' || f.includes(currentFormat);
+    cards.forEach(function(card) {
+      const matchBenefit = currentBenefit === 'all' || card.dataset.benefit === currentBenefit;
+      const matchFormat  = currentFormat  === 'all' || (card.dataset.format || '').includes(currentFormat);
       const show = matchBenefit && matchFormat;
-      card.parentElement.style.display = show ? '' : 'none';
+      // カード自体を show/hide（parentElement はグリッドなので触らない）
+      card.style.display = show ? '' : 'none';
       if (show) visible++;
     });
-    document.getElementById('course-count').textContent = `${visible}件 表示中`;
+    document.getElementById('course-count').textContent = visible + '件 表示中';
     document.getElementById('no-result').classList.toggle('hidden', visible > 0);
     document.getElementById('course-list').classList.toggle('hidden', visible === 0);
   }
@@ -236,16 +235,15 @@
   function sortCourses(val) {
     currentSort = val;
     const list  = document.getElementById('course-list');
-    const items = [...list.querySelectorAll('.course-card')].map(c => c.parentElement);
-    items.sort((a, b) => {
-      const ca = a.querySelector('.course-card');
-      const cb = b.querySelector('.course-card');
-      if (val === 'benefit_rate')      return parseInt(cb.dataset.rate)  - parseInt(ca.dataset.rate);
-      if (val === 'price_after_benefit') return parseInt(ca.dataset.price) - parseInt(cb.dataset.price);
-      if (val === 'price')             return parseInt(ca.dataset.rawPrice) - parseInt(cb.dataset.rawPrice);
+    // カード（<a>）は grid の直接の子要素
+    const cards = [...list.querySelectorAll('.course-card')];
+    cards.sort(function(a, b) {
+      if (val === 'benefit_rate')        return parseInt(b.dataset.rate)     - parseInt(a.dataset.rate);
+      if (val === 'price_after_benefit') return parseInt(a.dataset.price)    - parseInt(b.dataset.price);
+      if (val === 'price')               return parseInt(a.dataset.rawPrice) - parseInt(b.dataset.rawPrice);
       return 0;
     });
-    items.forEach(el => list.appendChild(el));
+    cards.forEach(function(card) { list.appendChild(card); });
   }
 </script>
 {% endblock %}
