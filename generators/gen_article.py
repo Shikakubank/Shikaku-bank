@@ -26,6 +26,12 @@ if sys.stderr.encoding != "utf-8":
     sys.stderr.reconfigure(encoding="utf-8", errors="replace")
 
 try:
+    from dotenv import load_dotenv
+    load_dotenv(Path(__file__).parent.parent / ".env")
+except ImportError:
+    pass  # python-dotenv 未インストール時はスキップ（CI環境など）
+
+try:
     import anthropic
 except ImportError:
     print("[ERROR] anthropicパッケージが見つかりません。pip install anthropic を実行してください。")

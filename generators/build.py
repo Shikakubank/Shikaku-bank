@@ -56,6 +56,13 @@ SITE_URL = os.environ.get("SITE_URL", "https://shikaku-bank.com")
 # ── カテゴリ定義（slug → DBフィールド名のマッピング）──────────
 CATEGORIES = [
     {
+        "slug": "design",
+        "name": "デザイン",
+        "icon": "🎨",
+        "fields": [],
+        "description": "Webデザイン・グラフィックデザインなどクリエイティブ系の給付金対象講座を比較。",
+    },
+    {
         "slug": "it",
         "name": "IT・プログラミング",
         "icon": "💻",
@@ -494,6 +501,236 @@ def build_search(env: Environment, conn: sqlite3.Connection) -> list[str]:
     return ["/search/"]
 
 
+# ── エリア定義 ───────────────────────────────────────────────
+AREAS = [
+    {"slug": "online",   "name": "オンライン", "icon": "🖥️", "pref": "オンライン"},
+    {"slug": "tokyo",    "name": "東京都",     "icon": "🗼", "pref": "東京都"},
+    {"slug": "osaka",    "name": "大阪府",     "icon": "🏯", "pref": "大阪府"},
+    {"slug": "kanagawa", "name": "神奈川県",   "icon": "⛵", "pref": "神奈川県"},
+    {"slug": "aichi",    "name": "愛知県",     "icon": "🌸", "pref": "愛知県"},
+    {"slug": "fukuoka",  "name": "福岡県",     "icon": "🍜", "pref": "福岡県"},
+    {"slug": "hokkaido", "name": "北海道",     "icon": "🦀", "pref": "北海道"},
+    {"slug": "miyagi",   "name": "宮城県",     "icon": "🌊", "pref": "宮城県"},
+    {"slug": "hiroshima","name": "広島県",     "icon": "⛩️", "pref": "広島県"},
+]
+
+
+def fetch_courses_by_area(conn: sqlite3.Connection, area: dict) -> list[dict]:
+    """エリアに対応する講座を取得（全国 or オンライン or 該当都道府県）"""
+    if area["slug"] == "online":
+        sql = """
+            SELECT c.*, s.name AS school_name
+            FROM courses c JOIN schools s ON c.school_id = s.id
+            WHERE (c.format LIKE '%オンライン%' OR c.prefecture = '全国')
+            AND c.is_active = 1
+            ORDER BY c.benefit_rate DESC, c.price_after_benefit ASC
+        """
+        rows = conn.execute(sql).fetchall()
+    else:
+        sql = """
+            SELECT c.*, s.name AS school_name
+            FROM courses c JOIN schools s ON c.school_id = s.id
+            WHERE (c.prefecture = '全国' OR c.prefecture LIKE ?)
+            AND c.is_active = 1
+            ORDER BY c.benefit_rate DESC, c.price_after_benefit ASC
+        """
+        rows = conn.execute(sql, (f"%{area['pref']}%",)).fetchall()
+    return [dict(r) for r in rows]
+
+
+# ── 補足ページ（固定・エリア・カテゴリ一覧）────────────────────
+def build_supplementary_pages(env: Environment, conn: sqlite3.Connection) -> list[str]:
+    pages: list[str] = []
+
+    # /about-kyufu/
+    ctx = base_ctx()
+    ctx.update({
+        "page": {
+            "title":       "教育訓練給付金とは？3種類の違いと受給条件をわかりやすく解説",
+            "description": "教育訓練給付金の仕組みを解説。一般・特定一般・専門実践の違い、受給条件、申請手順まで初めての方向けに紹介します。",
+            "canonical":   "/about-kyufu/",
+        },
+        "breadcrumbs": [{"name": "トップ", "url": "/"}, {"name": "給付金とは", "url": "/about-kyufu/"}],
+    })
+    write_page("about-kyufu/index.html", env.get_template("about_kyufu.html").render(**ctx))
+    pages.append("/about-kyufu/")
+
+    # /category/ 一覧
+    cat_counts = {
+        row[0]: row[1]
+        for row in conn.execute(
+            "SELECT field, COUNT(*) FROM courses WHERE is_active=1 GROUP BY field"
+        )
+    }
+    cat_items = []
+    for cat in CATEGORIES:
+        count = sum(cat_counts.get(f, 0) for f in cat["fields"])
+        cat_items.append({
+            "name": cat["name"], "icon": cat["icon"],
+            "url": f"/category/{cat['slug']}/", "count": count,
+        })
+    ctx = base_ctx()
+    ctx.update({
+        "page": {
+            "title":       "カテゴリ一覧｜給付金対象講座",
+            "description": "IT・語学・会計・医療など分野別に給付金対象講座を比較できます。",
+            "canonical":   "/category/",
+        },
+        "items": cat_items,
+        "page_ctx": {
+            "h1":   "カテゴリから探す",
+            "lead": "分野を選んで給付金対象講座を比較してみましょう。",
+        },
+        "breadcrumbs": [{"name": "トップ", "url": "/"}, {"name": "カテゴリ一覧", "url": "/category/"}],
+    })
+    # category_list.html に page と page_ctx を統合して渡す
+    ctx["page"].update({"h1": "カテゴリから探す", "lead": "分野を選んで給付金対象講座を比較してみましょう。"})
+    write_page("category/index.html", env.get_template("category_list.html").render(**ctx))
+    pages.append("/category/")
+
+    # /area/ 一覧
+    area_items = [
+        {"name": a["name"], "icon": a["icon"], "url": f"/area/{a['slug']}/"}
+        for a in AREAS
+    ]
+    ctx = base_ctx()
+    ctx.update({
+        "page": {
+            "title":       "エリアから講座を探す｜資格バンク",
+            "description": "都道府県・オンラインでエリアを絞って給付金対象講座を比較できます。",
+            "canonical":   "/area/",
+            "h1":          "エリアから探す",
+            "lead":        "お住まいのエリアや通いやすい地域から講座を探せます。",
+        },
+        "items": area_items,
+        "breadcrumbs": [{"name": "トップ", "url": "/"}, {"name": "エリアから探す", "url": "/area/"}],
+    })
+    write_page("area/index.html", env.get_template("category_list.html").render(**ctx))
+    pages.append("/area/")
+
+    # /area/{slug}/ 各エリアページ（category.html を流用）
+    for area in AREAS:
+        courses = fetch_courses_by_area(conn, area)
+        cat_ctx = {
+            "slug":        area["slug"],
+            "name":        area["name"],
+            "icon":        area["icon"],
+            "description": f"{area['name']}で受講できる教育訓練給付金対象の講座を比較。",
+        }
+        ctx = base_ctx()
+        ctx.update({
+            "page": {
+                "title":       f"{area['name']}の給付金対象講座｜資格バンク",
+                "description": cat_ctx["description"],
+                "canonical":   f"/area/{area['slug']}/",
+            },
+            "category": cat_ctx,
+            "courses":  courses,
+            "breadcrumbs": [
+                {"name": "トップ", "url": "/"},
+                {"name": "エリアから探す", "url": "/area/"},
+                {"name": area["name"], "url": f"/area/{area['slug']}/"},
+            ],
+        })
+        write_page(f"area/{area['slug']}/index.html", env.get_template("category.html").render(**ctx))
+        pages.append(f"/area/{area['slug']}/")
+
+    # 固定ページ（about / privacy / disclaimer / contact）
+    fixed_pages = [
+        {
+            "slug": "about",
+            "title": "運営者情報",
+            "description": "資格バンクの運営者情報です。",
+            "h1": "運営者情報",
+            "content": """
+<h2>サイト名</h2><p>資格バンク</p>
+<h2>サイトURL</h2><p>https://shikaku-bank.com</p>
+<h2>運営目的</h2>
+<p>教育訓練給付金の対象講座を中立な立場で比較・紹介し、
+スキルアップを目指す方の講座選びをサポートすることを目的としています。</p>
+<h2>収益について</h2>
+<p>当サイトは一部のリンクにアフィリエイト広告（成果報酬型広告）を利用しています。</p>
+<h2>お問い合わせ</h2><p><a href="/contact/">お問い合わせページ</a>よりご連絡ください。</p>
+""",
+        },
+        {
+            "slug": "privacy",
+            "title": "プライバシーポリシー",
+            "description": "資格バンクのプライバシーポリシーです。",
+            "h1": "プライバシーポリシー",
+            "content": """
+<h2>個人情報の取り扱い</h2>
+<p>当サイトでは、お問い合わせの際に氏名・メールアドレス等の個人情報を取得することがあります。
+取得した情報はお問い合わせへの返信のみに利用し、第三者に提供することはありません。</p>
+<h2>アクセス解析</h2>
+<p>当サイトはGoogle Analyticsを使用しています。Cookieを通じてデータを収集しますが、
+個人を特定する情報は含まれません。</p>
+<h2>アフィリエイト広告</h2>
+<p>当サイトはAmazonアソシエイト等のアフィリエイトプログラムに参加しており、
+紹介料を受け取ることがあります。</p>
+<h2>免責事項</h2>
+<p>掲載情報の正確性には万全を期していますが、内容の完全性・正確性を保証するものではありません。
+<a href="/disclaimer/">免責事項</a>もご確認ください。</p>
+""",
+        },
+        {
+            "slug": "disclaimer",
+            "title": "免責事項",
+            "description": "資格バンクの免責事項です。",
+            "h1": "免責事項",
+            "content": """
+<h2>情報の正確性について</h2>
+<p>当サイトに掲載している受講料・給付金額・講座内容は、各スクール公式サイト等をもとに
+独自調査したものです。最新情報は必ず各スクールの公式サイトでご確認ください。</p>
+<h2>給付金に関する免責</h2>
+<p>教育訓練給付金の受給可否・給付額は、個人の雇用保険加入状況等により異なります。
+詳細はお近くのハローワークにお問い合わせください。</p>
+<h2>外部リンクについて</h2>
+<p>当サイトから外部サイトへのリンクを掲載していますが、リンク先の内容について
+当サイトは責任を負いません。</p>
+<h2>損害について</h2>
+<p>当サイトの情報をご利用されたことによるいかなる損害についても、
+当サイトは責任を負いかねます。</p>
+""",
+        },
+        {
+            "slug": "contact",
+            "title": "お問い合わせ",
+            "description": "資格バンクへのお問い合わせはこちら。",
+            "h1": "お問い合わせ",
+            "content": """
+<p>当サイトへのお問い合わせは、以下のメールアドレスまでご連絡ください。</p>
+<p>内容を確認の上、順次ご返信いたします。なお、返信まで数日かかる場合があります。</p>
+<ul>
+  <li>掲載情報の誤りに関するご指摘</li>
+  <li>掲載・広告に関するご相談</li>
+  <li>その他お問い合わせ</li>
+</ul>
+<p>※ 教育訓練給付金の受給資格に関するご質問は、お近くのハローワークにお問い合わせください。</p>
+""",
+        },
+    ]
+    for fp in fixed_pages:
+        ctx = base_ctx()
+        ctx.update({
+            "page": {
+                "title":       fp["title"],
+                "description": fp["description"],
+                "canonical":   f"/{fp['slug']}/",
+                "h1":          fp["h1"],
+                "content":     fp["content"],
+            },
+            "breadcrumbs": [
+                {"name": "トップ", "url": "/"},
+                {"name": fp["h1"], "url": f"/{fp['slug']}/"},
+            ],
+        })
+        write_page(f"{fp['slug']}/index.html", env.get_template("fixed_page.html").render(**ctx))
+        pages.append(f"/{fp['slug']}/")
+
+    return pages
+
+
 # ── 静的ファイルコピー ────────────────────────────────────────
 def copy_static() -> None:
     dst = OUTPUT / "static"
@@ -589,7 +826,10 @@ def main() -> None:
             print("\n[5/6] 記事ページ")
             all_pages += build_article_pages(env, articles)
 
-            print("\n[6/6] 静的ファイル・サイトマップ")
+            print("\n[6/7] 補足ページ（給付金とは・エリア・固定ページ等）")
+            all_pages += build_supplementary_pages(env, conn)
+
+            print("\n[7/7] 静的ファイル・サイトマップ")
             copy_static()
             build_sitemap(all_pages)
             write_redirects()

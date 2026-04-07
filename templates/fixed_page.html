@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block title %}{{ page.title }}｜資格バンク{% endblock %}
+{% block description %}{{ page.description }}{% endblock %}
+
+{% block content %}
+<div class="max-w-3xl mx-auto px-4 py-10">
+  <h1 class="text-2xl font-black text-gray-900 mb-6">{{ page.h1 }}</h1>
+  <div class="bg-white rounded-2xl border border-gray-100 p-8 prose prose-sm max-w-none
+              prose-headings:font-bold prose-headings:text-gray-900
+              prose-p:text-gray-700 prose-a:text-primary-600">
+    {{ page.content | safe }}
+  </div>
+</div>
+{% endblock %}

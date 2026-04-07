@@ -1,0 +1,131 @@
+{% extends "base.html" %}
+{% block title %}教育訓練給付金とは？3種類の違いと受給条件をわかりやすく解説｜資格バンク{% endblock %}
+{% block description %}教育訓練給付金の仕組みを解説。一般・特定一般・専門実践の3種類の違い、受給条件、申請方法まで初めての方にもわかりやすく紹介します。{% endblock %}
+
+{% block content %}
+<div class="max-w-3xl mx-auto px-4 py-10">
+  <div class="mb-8">
+    <p class="text-xs font-semibold text-primary-600 uppercase tracking-wider mb-1">GUIDE</p>
+    <h1 class="text-2xl sm:text-3xl font-black text-gray-900 mb-3">教育訓練給付金とは？</h1>
+    <p class="text-sm text-gray-500 leading-relaxed">
+      厚生労働省が定める制度で、雇用保険の被保険者（または元被保険者）が対象の講座を受講すると、
+      受講料の一部が給付される制度です。最大70%の給付を受けられます。
+    </p>
+  </div>
+
+  {# 3種類カード #}
+  <section class="mb-10">
+    <h2 class="text-lg font-bold text-gray-900 mb-5">給付金の3つの種類</h2>
+    <div class="space-y-4">
+
+      <div class="bg-white rounded-2xl border border-primary-200 p-6 shadow-sm">
+        <div class="flex items-center gap-3 mb-3">
+          <div class="w-10 h-10 bg-primary-100 rounded-xl flex items-center justify-center text-xl">📘</div>
+          <div>
+            <p class="text-xs text-gray-500">給付率・上限</p>
+            <p class="font-black text-primary-700 text-xl">20%・上限10万円</p>
+          </div>
+        </div>
+        <h3 class="font-bold text-gray-900 mb-2">一般教育訓練給付金</h3>
+        <p class="text-sm text-gray-600 leading-relaxed mb-3">ITパスポート・簿記・宅建・英語検定など、幅広い資格が対象。雇用保険加入期間3年以上（初回は1年以上）が条件。</p>
+        <div class="bg-primary-50 rounded-xl p-3 text-sm">
+          <p class="text-gray-600">例：受講料50,000円 → 給付10,000円 → <span class="font-bold text-primary-700">実質40,000円</span></p>
+        </div>
+      </div>
+
+      <div class="bg-white rounded-2xl border border-orange-200 p-6 shadow-sm">
+        <div class="flex items-center gap-3 mb-3">
+          <div class="w-10 h-10 bg-orange-100 rounded-xl flex items-center justify-center text-xl">📙</div>
+          <div>
+            <p class="text-xs text-gray-500">給付率・上限</p>
+            <p class="font-black text-orange-600 text-xl">40%・上限20万円</p>
+          </div>
+        </div>
+        <h3 class="font-bold text-gray-900 mb-2">特定一般教育訓練給付金</h3>
+        <p class="text-sm text-gray-600 leading-relaxed mb-3">介護職員初任者研修・大型自動車免許など、速やかな再就職に役立つ講座が対象。雇用保険加入期間3年以上（初回は1年以上）が条件。</p>
+        <div class="bg-orange-50 rounded-xl p-3 text-sm">
+          <p class="text-gray-600">例：受講料100,000円 → 給付40,000円 → <span class="font-bold text-orange-600">実質60,000円</span></p>
+        </div>
+      </div>
+
+      <div class="bg-white rounded-2xl border border-red-200 p-6 shadow-sm relative">
+        <div class="absolute -top-3 left-6">
+          <span class="bg-red-500 text-white text-xs font-bold px-3 py-1 rounded-full">最大割引</span>
+        </div>
+        <div class="flex items-center gap-3 mb-3 mt-1">
+          <div class="w-10 h-10 bg-red-100 rounded-xl flex items-center justify-center text-xl">📕</div>
+          <div>
+            <p class="text-xs text-gray-500">給付率・上限</p>
+            <p class="font-black text-red-600 text-xl">最大70%・上限168万円/年</p>
+          </div>
+        </div>
+        <h3 class="font-bold text-gray-900 mb-2">専門実践教育訓練給付金</h3>
+        <p class="text-sm text-gray-600 leading-relaxed mb-3">プログラミングスクール・看護師養成・美容師など、中長期的なキャリアアップ向け。受講中50%＋就職ボーナス20%で最大70%。雇用保険加入期間3年以上（初回は2年以上）が条件。</p>
+        <div class="bg-red-50 rounded-xl p-3 text-sm">
+          <p class="text-gray-600">例：受講料900,000円 → 給付最大630,000円 → <span class="font-bold text-red-600">実質270,000円〜</span></p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  {# 受給条件 #}
+  <section class="mb-10">
+    <h2 class="text-lg font-bold text-gray-900 mb-4">受給の主な条件</h2>
+    <div class="bg-white rounded-2xl border border-gray-100 p-6 space-y-4">
+      <div class="flex gap-3">
+        <span class="w-6 h-6 bg-primary-600 text-white text-xs font-bold rounded-full flex items-center justify-center shrink-0 mt-0.5">1</span>
+        <div>
+          <p class="font-semibold text-gray-900 text-sm">雇用保険の被保険者（または元被保険者）であること</p>
+          <p class="text-xs text-gray-500 mt-1">在職中または離職後1年以内（一定の要件で延長あり）</p>
+        </div>
+      </div>
+      <div class="flex gap-3">
+        <span class="w-6 h-6 bg-primary-600 text-white text-xs font-bold rounded-full flex items-center justify-center shrink-0 mt-0.5">2</span>
+        <div>
+          <p class="font-semibold text-gray-900 text-sm">雇用保険の加入期間が一定以上あること</p>
+          <p class="text-xs text-gray-500 mt-1">一般・特定一般：3年以上（初回のみ1年以上）／専門実践：3年以上（初回のみ2年以上）</p>
+        </div>
+      </div>
+      <div class="flex gap-3">
+        <span class="w-6 h-6 bg-primary-600 text-white text-xs font-bold rounded-full flex items-center justify-center shrink-0 mt-0.5">3</span>
+        <div>
+          <p class="font-semibold text-gray-900 text-sm">厚生労働大臣が指定した講座を受講・修了すること</p>
+          <p class="text-xs text-gray-500 mt-1">受講前にハローワークで受給資格の確認が必要</p>
+        </div>
+      </div>
+    </div>
+    <p class="text-xs text-gray-400 mt-3 px-1">※ 詳細はお近くのハローワークにお問い合わせください。</p>
+  </section>
+
+  {# 申請の流れ #}
+  <section class="mb-10">
+    <h2 class="text-lg font-bold text-gray-900 mb-4">申請の流れ</h2>
+    <div class="bg-white rounded-2xl border border-gray-100 divide-y divide-gray-100">
+      {% for step in [
+        ("受給資格の確認", "ハローワークで給付金を受けられるか確認します。"),
+        ("講座の申し込み", "対象の給付金種別・講座を選んで申し込みます。"),
+        ("受講・修了",     "講座を受講し、修了証明書を受け取ります。"),
+        ("ハローワークで申請", "修了日の翌日から1か月以内に申請書類を提出します。"),
+        ("給付金の受取",   "審査後、登録口座に給付金が振り込まれます。"),
+      ] %}
+      <div class="flex gap-4 p-4">
+        <span class="w-7 h-7 bg-primary-600 text-white text-xs font-black rounded-full flex items-center justify-center shrink-0">{{ loop.index }}</span>
+        <div>
+          <p class="font-semibold text-gray-900 text-sm">{{ step[0] }}</p>
+          <p class="text-xs text-gray-500 mt-0.5">{{ step[1] }}</p>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </section>
+
+  {# CTA #}
+  <div class="bg-primary-50 rounded-2xl p-6 text-center">
+    <p class="font-bold text-gray-900 mb-2">給付金対象の講座を探してみましょう</p>
+    <p class="text-sm text-gray-500 mb-4">IT・語学・会計・医療など幅広い分野の講座を比較できます</p>
+    <a href="/search/" class="inline-block bg-accent hover:bg-accent-dark text-white font-bold px-8 py-3 rounded-xl transition-colors">
+      講座を無料で検索する
+    </a>
+  </div>
+</div>
+{% endblock %}
