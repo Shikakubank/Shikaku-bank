@@ -142,18 +142,15 @@ NAV_AREAS = [
     {"name": "広島県",   "slug": "hiroshima"},
 ]
 
-# 検索ページ用フィールドリスト（DB上のフィールド名をそのまま使う）
+# 検索ページ用フィールドリスト（category slug で絞り込む）
 SEARCH_FIELDS = [
-    {"name": "IT・プログラミング", "icon": "💻", "db_field": "IT"},
-    {"name": "AI・機械学習",       "icon": "🤖", "db_field": "AI"},
-    {"name": "データ分析",         "icon": "📊", "db_field": "データ分析"},
-    {"name": "語学・英会話",       "icon": "🌍", "db_field": "語学"},
-    {"name": "会計・簿記・金融",   "icon": "📒", "db_field": "会計"},
-    {"name": "法務・行政",         "icon": "⚖️", "db_field": "法務"},
-    {"name": "不動産",             "icon": "🏠", "db_field": "不動産"},
-    {"name": "医療・介護",         "icon": "🏥", "db_field": "医療"},
-    {"name": "キャリア",           "icon": "💼", "db_field": "キャリア"},
-    {"name": "経営・ビジネス",     "icon": "📈", "db_field": "経営"},
+    {"name": "IT・プログラミング", "icon": "💻", "slug": "it"},         # IT, AI, データ分析
+    {"name": "語学・英会話",       "icon": "🌍", "slug": "english"},    # 語学
+    {"name": "会計・簿記・金融",   "icon": "📒", "slug": "accounting"}, # 会計, 金融
+    {"name": "法務・行政",         "icon": "⚖️", "slug": "legal"},      # 法務, キャリア
+    {"name": "不動産",             "icon": "🏠", "slug": "estate"},     # 不動産
+    {"name": "医療・介護",         "icon": "🏥", "slug": "medical"},    # 医療, 介護
+    {"name": "経営・ビジネス",     "icon": "📈", "slug": "business"},   # 経営
 ]
 
 # top.html 用 FIELDS（preview.py と同じ）
@@ -468,6 +465,7 @@ def build_search(env: Environment, conn: sqlite3.Connection) -> list[str]:
             "name":                c["name"],
             "school_name":         c["school_name"],
             "field":               c["field"],
+            "category_slug":       FIELD_TO_CATEGORY.get(c["field"], ""),
             "benefit_type":        c["benefit_type"],
             "benefit_rate":        c["benefit_rate"],
             "price":               c["price"],

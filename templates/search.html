@@ -29,7 +29,7 @@
                   onchange="applyFilters()">
             <option value="">📚 すべての分野</option>
             {% for f in fields %}
-            <option value="{{ f.db_field }}">{{ f.icon }} {{ f.name }}</option>
+            <option value="{{ f.slug }}">{{ f.icon }} {{ f.name }}</option>
             {% endfor %}
           </select>
         </div>
@@ -166,7 +166,7 @@ function applyFilters() {
   const sort    = document.getElementById('sort').value;
 
   let filtered = ALL_COURSES.filter(c => {
-    if (field   && c.field        !== field)            return false;
+    if (field   && c.category_slug !== field)           return false;
     if (benefit && c.benefit_type !== benefit)          return false;
     if (format  && !(c.format || '').includes(format))  return false;
     if (q) {
