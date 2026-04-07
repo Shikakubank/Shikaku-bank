@@ -33,44 +33,256 @@
 </script>
 {% endblock %}
 
+{% block head_extra %}
+<style>
+/* ════════════════════════════════════════
+   記事本文スタイル
+════════════════════════════════════════ */
+.article-body {
+  font-size: 0.9375rem;
+  line-height: 1.85;
+  color: #374151;
+}
+
+/* ── 段落 ─────────────────────────────── */
+.article-body p {
+  margin-bottom: 1.4rem;
+}
+
+/* ── H2：左ボーダー＋背景色 ──────────── */
+.article-body h2 {
+  font-size: 1.125rem;
+  font-weight: 800;
+  color: #1e40af;
+  background: linear-gradient(to right, #eff6ff, #f0f7ff00);
+  border-left: 4px solid #2563eb;
+  padding: 0.75rem 1rem 0.75rem 1rem;
+  border-radius: 0 0.5rem 0.5rem 0;
+  margin-top: 2.75rem;
+  margin-bottom: 1.1rem;
+}
+
+/* ── H3：ダイヤ形マーカー ────────────── */
+.article-body h3 {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #1f2937;
+  padding-left: 1.4rem;
+  position: relative;
+  margin-top: 2rem;
+  margin-bottom: 0.75rem;
+}
+.article-body h3::before {
+  content: "◆";
+  position: absolute;
+  left: 0;
+  top: 0.15rem;
+  color: #2563eb;
+  font-size: 0.6rem;
+}
+
+/* ── UL：チェックマーク付きカード ──────── */
+.article-body ul {
+  list-style: none;
+  padding: 0;
+  margin-bottom: 1.4rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+.article-body ul > li {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.625rem;
+  padding: 0.625rem 0.875rem;
+  background: #f8faff;
+  border-radius: 0.5rem;
+  border-left: 3px solid #93c5fd;
+  font-size: 0.9rem;
+  line-height: 1.65;
+}
+.article-body ul > li::before {
+  content: "✓";
+  color: #2563eb;
+  font-weight: 900;
+  font-size: 0.8rem;
+  flex-shrink: 0;
+  margin-top: 0.15rem;
+}
+
+/* ── OL：番号バッジ付き ─────────────── */
+.article-body ol {
+  list-style: none;
+  padding: 0;
+  counter-reset: ol-counter;
+  margin-bottom: 1.4rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+.article-body ol > li {
+  counter-increment: ol-counter;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 0.625rem 0.875rem 0.625rem 0;
+  font-size: 0.9rem;
+  line-height: 1.65;
+}
+.article-body ol > li::before {
+  content: counter(ol-counter);
+  background: #2563eb;
+  color: white;
+  min-width: 1.5rem;
+  height: 1.5rem;
+  border-radius: 9999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.7rem;
+  font-weight: 800;
+  flex-shrink: 0;
+  margin-top: 0.1rem;
+}
+
+/* ── Blockquote：ポイントボックス ──────── */
+.article-body blockquote {
+  background: #fff7ed;
+  border: none;
+  border-left: 4px solid #f97316;
+  border-radius: 0 0.75rem 0.75rem 0;
+  padding: 1rem 1.25rem;
+  margin: 1.75rem 0;
+}
+.article-body blockquote::before {
+  content: "💡 ポイント";
+  display: block;
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #ea580c;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.5rem;
+}
+.article-body blockquote p {
+  margin-bottom: 0;
+  color: #78350f;
+  font-size: 0.9rem;
+}
+
+/* ── リンク ─────────────────────────── */
+.article-body a {
+  color: #2563eb;
+  text-decoration: none;
+  border-bottom: 1px solid #bfdbfe;
+  transition: border-color 0.15s;
+}
+.article-body a:hover {
+  border-bottom-color: #2563eb;
+}
+
+/* ── Strong ─────────────────────────── */
+.article-body strong {
+  color: #111827;
+  font-weight: 700;
+}
+
+/* ── Table ──────────────────────────── */
+.article-body table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 1.4rem;
+  font-size: 0.875rem;
+}
+.article-body th {
+  background: #dbeafe;
+  color: #1e40af;
+  font-weight: 700;
+  padding: 0.5rem 0.875rem;
+  text-align: left;
+  border: 1px solid #bfdbfe;
+}
+.article-body td {
+  padding: 0.5rem 0.875rem;
+  border: 1px solid #e5e7eb;
+  vertical-align: top;
+}
+.article-body tr:nth-child(even) td { background: #f8faff; }
+
+/* ── ステップカード（JSで付与） ─────── */
+.step-card {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 1rem;
+  padding: 1.25rem 1.5rem;
+  margin: 1.25rem 0;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+}
+/* step-card 内の h2/h3 をリセット */
+.article-body .step-card h2,
+.article-body .step-card h3 {
+  background: none;
+  border-left: none;
+  border-radius: 0;
+  padding: 0 0 0.75rem 0;
+  margin: 0 0 0.875rem 0;
+  border-bottom: 1px solid #f3f4f6;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 0.9375rem;
+  font-weight: 800;
+  color: #1f2937;
+}
+.article-body .step-card h2::before,
+.article-body .step-card h3::before { display: none; }
+.step-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 2rem;
+  height: 2rem;
+  background: #2563eb;
+  color: #fff;
+  border-radius: 9999px;
+  font-size: 0.8rem;
+  font-weight: 900;
+  flex-shrink: 0;
+}
+.step-card p   { margin-bottom: 0.75rem; font-size: 0.9rem; }
+.step-card p:last-child { margin-bottom: 0; }
+.step-card ul,
+.step-card ol  { margin-bottom: 0.75rem; }
+</style>
+{% endblock %}
+
 {% block content %}
 <div class="max-w-3xl mx-auto px-4 py-8">
 
   {# ── 記事ヘッダー ── #}
-  <div class="mb-8">
+  <div class="mb-10">
     <div class="flex items-center gap-2 mb-4">
       <span class="bg-primary-100 text-primary-700 text-xs font-semibold px-2.5 py-1 rounded-full">
         {{ article.category }}
       </span>
       <span class="text-xs text-gray-400">{{ article.published_at }}</span>
     </div>
-    <h1 class="text-2xl sm:text-3xl font-black text-gray-900 leading-tight mb-4">
+    <h1 class="text-2xl sm:text-3xl font-black text-gray-900 leading-tight mb-5">
       {{ article.title }}
     </h1>
     {% if article.excerpt %}
-    <p class="text-sm text-gray-500 leading-relaxed bg-gray-50 rounded-xl p-4 border-l-4 border-primary-400">
+    <p class="text-sm text-gray-600 leading-relaxed bg-blue-50 rounded-xl p-4 border-l-4 border-primary-400">
       {{ article.excerpt }}
     </p>
     {% endif %}
   </div>
 
   {# ── 記事本文 ── #}
-  <article class="prose prose-sm sm:prose max-w-none
-                  prose-headings:font-bold prose-headings:text-gray-900
-                  prose-h2:text-xl prose-h2:mt-8 prose-h2:mb-4
-                  prose-h3:text-base prose-h3:mt-6 prose-h3:mb-3
-                  prose-p:text-gray-700 prose-p:leading-relaxed
-                  prose-a:text-primary-600 prose-a:no-underline hover:prose-a:underline
-                  prose-strong:text-gray-900
-                  prose-ul:text-gray-700 prose-ol:text-gray-700
-                  prose-li:my-1
-                  prose-table:text-sm prose-th:bg-primary-50 prose-th:text-primary-800
-                  prose-blockquote:border-primary-400 prose-blockquote:text-gray-600">
+  <article class="article-body">
     {{ article.content_html | safe }}
   </article>
 
   {# ── 記事フッター ── #}
-  <div class="mt-12 pt-6 border-t border-gray-200">
+  <div class="mt-14 pt-6 border-t border-gray-200">
     <p class="text-xs text-gray-400 mb-6">
       ※ 掲載情報は執筆時点のものです。受講料・給付金の最新情報は各スクール公式サイトでご確認ください。
     </p>
@@ -120,4 +332,44 @@
   </section>
   {% endif %}
 </div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+(function () {
+  const body = document.querySelector('.article-body');
+  if (!body) return;
+
+  // ── ステップ見出しをカード化 ─────────────────────────────
+  // 「ステップ1」「手順2」「STEP 3」などを含むh2/h3を検出してラップ
+  const headings = Array.from(body.querySelectorAll('h2, h3'));
+  let cardCount = 0;
+
+  headings.forEach(function (h) {
+    if (!/ステップ\s*[1-9０-９]|手順\s*[1-9０-９]|STEP\s*[1-9]/i.test(h.textContent)) return;
+
+    cardCount++;
+
+    // バッジ挿入
+    const badge = document.createElement('span');
+    badge.className = 'step-badge';
+    badge.textContent = cardCount;
+    h.prepend(badge);
+
+    // カードラッパー作成
+    const card = document.createElement('div');
+    card.className = 'step-card';
+    h.parentNode.insertBefore(card, h);
+    card.appendChild(h);
+
+    // 次のh2/h3まで後続要素をカードへ移動
+    let next = card.nextElementSibling;
+    while (next && !['H2', 'H3'].includes(next.tagName)) {
+      const node = next;
+      next = next.nextElementSibling;
+      card.appendChild(node);
+    }
+  });
+})();
+</script>
 {% endblock %}
