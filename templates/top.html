@@ -1,0 +1,505 @@
+{% extends "base.html" %}
+
+{# ════════════════════════════════════════
+   SEO・メタ
+════════════════════════════════════════ #}
+{% block title %}資格バンク｜補助金で最大70%OFF！教育訓練給付金対象の資格・スキルアップ講座を比較{% endblock %}
+
+{% block description %}教育訓練給付金を使えば受講料が最大70%OFF。IT・語学・会計・医療など15,000件以上の対象講座を比較検索。あなたにぴったりの講座が見つかります。{% endblock %}
+
+{% block ogp %}
+<meta property="og:type"        content="website">
+<meta property="og:title"       content="資格バンク｜補助金で最大70%OFF！給付金対象の資格・スキルアップ講座を比較">
+<meta property="og:description" content="教育訓練給付金を使えば受講料が最大70%OFF。IT・語学・会計・医療など15,000件以上の対象講座を比較検索。">
+<meta property="og:url"         content="{{ site_url }}/">
+<meta property="og:image"       content="{{ site_url }}/static/images/og-top.png">
+<meta property="og:site_name"   content="資格バンク">
+<meta property="og:locale"      content="ja_JP">
+<meta name="twitter:card"       content="summary_large_image">
+{% endblock %}
+
+{% block jsonld %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "WebSite",
+      "@id": "{{ site_url }}/#website",
+      "url": "{{ site_url }}/",
+      "name": "資格バンク",
+      "description": "教育訓練給付金対象の資格・スキルアップ講座を比較・検索できるメディア",
+      "inLanguage": "ja",
+      "potentialAction": {
+        "@type": "SearchAction",
+        "target": {
+          "@type": "EntryPoint",
+          "urlTemplate": "{{ site_url }}/search/?q={search_term_string}"
+        },
+        "query-input": "required name=search_term_string"
+      }
+    },
+    {
+      "@type": "Organization",
+      "@id": "{{ site_url }}/#organization",
+      "name": "資格バンク",
+      "url": "{{ site_url }}/",
+      "logo": {
+        "@type": "ImageObject",
+        "url": "{{ site_url }}/static/images/logo.png"
+      }
+    }
+  ]
+}
+</script>
+{% endblock %}
+
+{# パンくずなし（トップページ）#}
+{% block breadcrumb %}{% endblock %}
+
+{# ════════════════════════════════════════
+   コンテンツ
+════════════════════════════════════════ #}
+{% block content %}
+
+{# ────────────────────────────────────────
+   1. ヒーローセクション
+──────────────────────────────────────── #}
+<section class="relative bg-gradient-to-br from-primary-800 via-primary-700 to-primary-600 overflow-hidden">
+
+  {# 背景デコレーション #}
+  <div class="absolute inset-0 overflow-hidden pointer-events-none">
+    <div class="absolute -top-24 -right-24 w-96 h-96 bg-primary-500 rounded-full opacity-20 blur-3xl"></div>
+    <div class="absolute bottom-0 -left-16 w-64 h-64 bg-primary-900 rounded-full opacity-30 blur-2xl"></div>
+    <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full" style="background:radial-gradient(ellipse at center, rgba(37,99,235,0.3) 0%, transparent 70%)"></div>
+  </div>
+
+  <div class="relative max-w-6xl mx-auto px-4 py-14 md:py-20">
+    <div class="text-center mb-10">
+
+      {# バッジ #}
+      <div class="inline-flex items-center gap-2 bg-white/15 backdrop-blur-sm border border-white/20 text-white text-xs font-semibold px-4 py-1.5 rounded-full mb-5">
+        <span class="w-2 h-2 bg-accent rounded-full animate-pulse"></span>
+        15,000件以上の給付金対象講座を掲載
+      </div>
+
+      {# メインキャッチ #}
+      <h1 class="text-3xl sm:text-4xl md:text-5xl font-black text-white leading-tight tracking-tight mb-4">
+        補助金で<span class="text-accent-light relative">最大<span class="text-5xl sm:text-6xl md:text-7xl">70%</span>OFF</span>。<br class="hidden sm:block">
+        <span class="text-2xl sm:text-3xl md:text-4xl font-bold">あなたに合った資格講座を見つけよう</span>
+      </h1>
+
+      <p class="text-primary-100 text-sm sm:text-base md:text-lg max-w-xl mx-auto leading-relaxed">
+        教育訓練給付金を活用すれば、IT・語学・会計・医療などの<br class="hidden md:block">
+        資格スクール受講料が大幅に安くなります。
+      </p>
+    </div>
+
+    {# ── 検索ボックス ── #}
+    <div class="bg-white rounded-2xl shadow-2xl p-5 sm:p-6 max-w-2xl mx-auto">
+      <p class="text-sm font-semibold text-gray-500 mb-3 text-center">分野とエリアで絞り込む</p>
+      <form action="/search/" method="get" class="flex flex-col sm:flex-row gap-3">
+        <select name="field"
+                class="flex-1 bg-gray-50 border border-gray-200 text-gray-800 text-sm rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent">
+          <option value="">📚 すべての分野</option>
+          {% for f in fields %}
+          <option value="{{ f.slug }}">{{ f.icon }} {{ f.name }}</option>
+          {% endfor %}
+        </select>
+        <select name="area"
+                class="flex-1 bg-gray-50 border border-gray-200 text-gray-800 text-sm rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent">
+          <option value="">🗾 すべてのエリア</option>
+          <option value="online">🖥️ オンライン</option>
+          {% for a in areas %}
+          <option value="{{ a.slug }}">{{ a.name }}</option>
+          {% endfor %}
+        </select>
+        <button type="submit"
+                class="bg-accent hover:bg-accent-dark text-white font-bold px-6 py-3 rounded-xl transition-colors shadow-md flex items-center justify-center gap-2 shrink-0">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+          検索
+        </button>
+      </form>
+      <p class="text-xs text-gray-400 text-center mt-3">
+        ※ 受給資格（雇用保険加入期間等）の確認は
+        <a href="/about-kyufu/" class="text-primary-600 hover:underline">こちら</a>
+      </p>
+    </div>
+
+    {# ── 統計バー ── #}
+    <div class="grid grid-cols-3 gap-3 max-w-lg mx-auto mt-8 text-center">
+      <div class="text-white">
+        <p class="text-2xl sm:text-3xl font-black">15,000<span class="text-base font-semibold">件+</span></p>
+        <p class="text-xs text-primary-200 mt-0.5">給付金対象講座</p>
+      </div>
+      <div class="text-white border-x border-white/20">
+        <p class="text-2xl sm:text-3xl font-black">最大<span class="text-accent-light">70%</span></p>
+        <p class="text-xs text-primary-200 mt-0.5">給付金割引率</p>
+      </div>
+      <div class="text-white">
+        <p class="text-2xl sm:text-3xl font-black">47<span class="text-base font-semibold">都道府県</span></p>
+        <p class="text-xs text-primary-200 mt-0.5">+オンライン</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+{# ────────────────────────────────────────
+   2. 人気カテゴリ
+──────────────────────────────────────── #}
+<section class="max-w-6xl mx-auto px-4 py-12">
+  <div class="flex items-end justify-between mb-6">
+    <div>
+      <p class="text-xs font-semibold text-primary-600 uppercase tracking-wider mb-1">POPULAR CATEGORY</p>
+      <h2 class="text-xl sm:text-2xl font-bold text-gray-900">人気カテゴリから探す</h2>
+    </div>
+    <a href="/category/" class="text-sm text-primary-600 hover:text-primary-700 font-medium flex items-center gap-1">
+      すべて見る
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+    </a>
+  </div>
+
+  <div class="grid grid-cols-3 sm:grid-cols-3 md:grid-cols-6 gap-3 sm:gap-4">
+    {% set popular_cats = [
+      {"icon": "💻", "name": "IT・プログラミング", "slug": "it",       "count": 3200, "color": "bg-blue-50 hover:bg-blue-100 border-blue-100"},
+      {"icon": "🌍", "name": "語学・英会話",       "slug": "english",  "count": 1800, "color": "bg-green-50 hover:bg-green-100 border-green-100"},
+      {"icon": "📊", "name": "会計・簿記",          "slug": "accounting","count": 2100, "color": "bg-yellow-50 hover:bg-yellow-100 border-yellow-100"},
+      {"icon": "🏥", "name": "医療・介護",          "slug": "medical",  "count": 1500, "color": "bg-red-50 hover:bg-red-100 border-red-100"},
+      {"icon": "🏠", "name": "不動産・宅建",        "slug": "estate",   "count": 900,  "color": "bg-orange-50 hover:bg-orange-100 border-orange-100"},
+      {"icon": "🎨", "name": "デザイン・クリエイティブ", "slug": "design", "count": 700, "color": "bg-purple-50 hover:bg-purple-100 border-purple-100"},
+    ] %}
+    {% for cat in popular_cats %}
+    <a href="/category/{{ cat.slug }}/"
+       class="group flex flex-col items-center text-center px-2 py-4 rounded-2xl border {{ cat.color }} transition-all duration-200 hover:shadow-md hover:-translate-y-0.5">
+      <span class="text-3xl sm:text-4xl mb-2 group-hover:scale-110 transition-transform duration-200">{{ cat.icon }}</span>
+      <p class="text-xs sm:text-sm font-semibold text-gray-800 leading-tight">{{ cat.name }}</p>
+      <p class="text-xs text-gray-400 mt-1">{{ cat.count | number_format }}件</p>
+    </a>
+    {% endfor %}
+  </div>
+</section>
+
+
+{# ────────────────────────────────────────
+   3. 注目の講座（新着 or ピックアップ）
+──────────────────────────────────────── #}
+{% if pickup_courses %}
+<section class="bg-primary-50 py-12">
+  <div class="max-w-6xl mx-auto px-4">
+    <div class="flex items-end justify-between mb-6">
+      <div>
+        <p class="text-xs font-semibold text-primary-600 uppercase tracking-wider mb-1">PICKUP</p>
+        <h2 class="text-xl sm:text-2xl font-bold text-gray-900">注目の講座</h2>
+      </div>
+      <a href="/search/" class="text-sm text-primary-600 hover:text-primary-700 font-medium flex items-center gap-1">
+        すべて見る
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+      </a>
+    </div>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      {% for course in pickup_courses[:6] %}
+      <a href="/course/{{ course.id }}/"
+         class="group bg-white rounded-2xl border border-gray-100 p-5 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 flex flex-col">
+
+        {# 給付金バッジ #}
+        <div class="flex items-center gap-2 mb-3">
+          {% if course.benefit_type == "専門実践" %}
+          <span class="bg-red-500 text-white text-xs font-bold px-2.5 py-1 rounded-full">専門実践</span>
+          {% elif course.benefit_type == "特定一般" %}
+          <span class="bg-orange-500 text-white text-xs font-bold px-2.5 py-1 rounded-full">特定一般</span>
+          {% else %}
+          <span class="bg-primary-600 text-white text-xs font-bold px-2.5 py-1 rounded-full">一般</span>
+          {% endif %}
+          <span class="text-xs text-gray-500">{{ course.field }}</span>
+        </div>
+
+        {# 講座名 #}
+        <h3 class="text-sm font-bold text-gray-900 mb-1 line-clamp-2 group-hover:text-primary-600 transition-colors flex-1">
+          {{ course.name }}
+        </h3>
+        <p class="text-xs text-gray-500 mb-3">{{ course.school_name }}</p>
+
+        {# 料金 #}
+        <div class="border-t border-gray-100 pt-3 mt-auto">
+          <div class="flex items-baseline justify-between">
+            <div>
+              <p class="text-xs text-gray-400 line-through">¥{{ "{:,}".format(course.price) }}</p>
+              <p class="text-xl font-black text-accent">¥{{ "{:,}".format(course.price_after_benefit) }}<span class="text-xs font-normal text-gray-500">〜（税込）</span></p>
+            </div>
+            <span class="bg-accent/10 text-accent font-bold text-sm px-2.5 py-1 rounded-full">
+              {{ course.benefit_rate }}%OFF
+            </span>
+          </div>
+        </div>
+      </a>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endif %}
+
+
+{# ────────────────────────────────────────
+   4. 教育訓練給付金とは？
+──────────────────────────────────────── #}
+<section class="max-w-6xl mx-auto px-4 py-14">
+  <div class="text-center mb-10">
+    <p class="text-xs font-semibold text-primary-600 uppercase tracking-wider mb-1">ABOUT</p>
+    <h2 class="text-xl sm:text-2xl font-bold text-gray-900">教育訓練給付金とは？</h2>
+    <p class="text-sm text-gray-500 mt-2 max-w-lg mx-auto">
+      厚生労働省が定める制度で、雇用保険の被保険者（または元被保険者）が<br class="hidden sm:block">
+      対象の資格・スキルアップ講座を受講すると、受講料の一部が戻ってきます。
+    </p>
+  </div>
+
+  {# 3種類カード #}
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-5 mb-10">
+
+    {# 一般 #}
+    <div class="relative bg-white rounded-2xl border border-primary-200 p-6 shadow-sm hover:shadow-md transition-shadow">
+      <div class="flex items-center gap-3 mb-4">
+        <div class="w-10 h-10 bg-primary-100 rounded-xl flex items-center justify-center">
+          <span class="text-xl">📘</span>
+        </div>
+        <div>
+          <p class="text-xs text-gray-500">給付率</p>
+          <p class="text-2xl font-black text-primary-700">20<span class="text-lg">%</span></p>
+        </div>
+      </div>
+      <h3 class="font-bold text-gray-900 mb-1">一般教育訓練</h3>
+      <p class="text-sm text-gray-500 leading-relaxed">
+        ITパスポートや簿記、宅建など幅広い資格が対象。
+        受講料の20%（上限10万円）が給付されます。
+      </p>
+      <div class="mt-4 bg-primary-50 rounded-xl p-3 text-sm">
+        <p class="text-gray-600">例：10万円の講座 → <span class="font-bold text-primary-700">実質8万円</span></p>
+      </div>
+    </div>
+
+    {# 特定一般 #}
+    <div class="relative bg-white rounded-2xl border border-orange-200 p-6 shadow-sm hover:shadow-md transition-shadow">
+      <div class="flex items-center gap-3 mb-4">
+        <div class="w-10 h-10 bg-orange-100 rounded-xl flex items-center justify-center">
+          <span class="text-xl">📙</span>
+        </div>
+        <div>
+          <p class="text-xs text-gray-500">給付率</p>
+          <p class="text-2xl font-black text-orange-600">40<span class="text-lg">%</span></p>
+        </div>
+      </div>
+      <h3 class="font-bold text-gray-900 mb-1">特定一般教育訓練</h3>
+      <p class="text-sm text-gray-500 leading-relaxed">
+        介護職員初任者研修や大型免許など、速やかな再就職に役立つ講座が対象。
+        受講料の40%（上限20万円）が給付されます。
+      </p>
+      <div class="mt-4 bg-orange-50 rounded-xl p-3 text-sm">
+        <p class="text-gray-600">例：10万円の講座 → <span class="font-bold text-orange-600">実質6万円</span></p>
+      </div>
+    </div>
+
+    {# 専門実践 #}
+    <div class="relative bg-white rounded-2xl border border-red-200 p-6 shadow-sm hover:shadow-md transition-shadow">
+      <div class="absolute -top-3 left-1/2 -translate-x-1/2">
+        <span class="bg-red-500 text-white text-xs font-bold px-3 py-1 rounded-full shadow">最大割引</span>
+      </div>
+      <div class="flex items-center gap-3 mb-4">
+        <div class="w-10 h-10 bg-red-100 rounded-xl flex items-center justify-center">
+          <span class="text-xl">📕</span>
+        </div>
+        <div>
+          <p class="text-xs text-gray-500">給付率</p>
+          <p class="text-2xl font-black text-red-600">最大70<span class="text-lg">%</span></p>
+        </div>
+      </div>
+      <h3 class="font-bold text-gray-900 mb-1">専門実践教育訓練</h3>
+      <p class="text-sm text-gray-500 leading-relaxed">
+        プログラミングスクールや看護師養成など、中長期的なキャリアアップ向け。
+        受講料の50〜70%（上限168万円）が給付されます。
+      </p>
+      <div class="mt-4 bg-red-50 rounded-xl p-3 text-sm">
+        <p class="text-gray-600">例：90万円の講座 → <span class="font-bold text-red-600">実質27万円〜</span></p>
+      </div>
+    </div>
+  </div>
+
+  {# 注意書き・CTAリンク #}
+  <div class="bg-gray-50 rounded-2xl p-5 text-center">
+    <p class="text-sm text-gray-600 mb-3">
+      給付金を受け取るには<strong>雇用保険の加入期間（初回：1〜3年以上）</strong>などの要件があります。
+    </p>
+    <a href="/about-kyufu/"
+       class="inline-flex items-center gap-2 bg-white border border-primary-200 text-primary-600 hover:bg-primary-50 text-sm font-semibold px-5 py-2.5 rounded-xl transition-colors shadow-sm">
+      受給要件を詳しく見る
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+    </a>
+  </div>
+</section>
+
+
+{# ────────────────────────────────────────
+   5. 給付金シミュレーター（簡易）
+──────────────────────────────────────── #}
+<section class="bg-gradient-to-r from-primary-700 to-primary-600 py-12">
+  <div class="max-w-3xl mx-auto px-4 text-center">
+    <p class="text-xs font-semibold text-primary-200 uppercase tracking-wider mb-2">SIMULATION</p>
+    <h2 class="text-xl sm:text-2xl font-bold text-white mb-2">いくら戻る？給付金シミュレーター</h2>
+    <p class="text-primary-200 text-sm mb-6">受講料を入力すると、種別ごとの給付額と実質負担額がわかります。</p>
+
+    <div class="bg-white rounded-2xl p-6 shadow-xl">
+      <div class="flex flex-col sm:flex-row items-center gap-3 mb-4">
+        <label class="text-sm font-medium text-gray-700 shrink-0">受講料（税込）</label>
+        <div class="relative flex-1 w-full sm:w-auto">
+          <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">¥</span>
+          <input type="number" id="sim-price" value="500000" min="0" step="10000"
+                 class="w-full bg-gray-50 border border-gray-200 rounded-xl pl-7 pr-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500">
+        </div>
+        <button onclick="simulate()"
+                class="w-full sm:w-auto bg-primary-600 hover:bg-primary-700 text-white font-bold text-sm px-5 py-3 rounded-xl transition-colors">
+          計算する
+        </button>
+      </div>
+
+      <div id="sim-result" class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        <div class="bg-primary-50 rounded-xl p-3 text-center">
+          <p class="text-xs text-gray-500 mb-1">一般（20%）</p>
+          <p class="text-xl font-black text-primary-700" id="result-general">¥400,000</p>
+          <p class="text-xs text-gray-400">実質負担額</p>
+        </div>
+        <div class="bg-orange-50 rounded-xl p-3 text-center">
+          <p class="text-xs text-gray-500 mb-1">特定一般（40%）</p>
+          <p class="text-xl font-black text-orange-600" id="result-tokutei">¥300,000</p>
+          <p class="text-xs text-gray-400">実質負担額</p>
+        </div>
+        <div class="bg-red-50 rounded-xl p-3 text-center border-2 border-red-200">
+          <p class="text-xs text-gray-500 mb-1">専門実践（70%）</p>
+          <p class="text-xl font-black text-red-600" id="result-senmon">¥150,000</p>
+          <p class="text-xs text-gray-400">実質負担額</p>
+        </div>
+      </div>
+      <p class="text-xs text-gray-400 mt-3">※ 上限額を超える場合は上限額で計算。専門実践は就職ボーナス含む。目安です。</p>
+    </div>
+  </div>
+</section>
+
+
+{# ────────────────────────────────────────
+   6. 新着記事
+──────────────────────────────────────── #}
+<section class="max-w-6xl mx-auto px-4 py-14">
+  <div class="flex items-end justify-between mb-6">
+    <div>
+      <p class="text-xs font-semibold text-primary-600 uppercase tracking-wider mb-1">COLUMN</p>
+      <h2 class="text-xl sm:text-2xl font-bold text-gray-900">新着コラム</h2>
+    </div>
+    <a href="/articles/" class="text-sm text-primary-600 hover:text-primary-700 font-medium flex items-center gap-1">
+      すべて見る
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+    </a>
+  </div>
+
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+    {% for article in latest_articles[:6] %}
+    <a href="/articles/{{ article.slug }}/"
+       class="group bg-white rounded-2xl border border-gray-100 overflow-hidden hover:shadow-lg transition-all duration-200 hover:-translate-y-0.5 flex flex-col">
+      {% if article.thumbnail %}
+      <div class="aspect-video overflow-hidden bg-gray-100">
+        <img src="{{ article.thumbnail }}" alt="{{ article.title }}"
+             class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+      </div>
+      {% else %}
+      <div class="aspect-video bg-gradient-to-br from-primary-100 to-primary-200 flex items-center justify-center">
+        <span class="text-4xl">{{ article.icon | default('📝') }}</span>
+      </div>
+      {% endif %}
+      <div class="p-4 flex flex-col flex-1">
+        <div class="flex items-center gap-2 mb-2">
+          <span class="bg-primary-100 text-primary-700 text-xs font-semibold px-2.5 py-0.5 rounded-full">{{ article.category }}</span>
+          <span class="text-xs text-gray-400">{{ article.published_at | dateformat }}</span>
+        </div>
+        <h3 class="text-sm font-bold text-gray-900 line-clamp-2 group-hover:text-primary-600 transition-colors flex-1">
+          {{ article.title }}
+        </h3>
+        {% if article.excerpt %}
+        <p class="text-xs text-gray-500 mt-2 line-clamp-2 leading-relaxed">{{ article.excerpt }}</p>
+        {% endif %}
+      </div>
+    </a>
+    {% else %}
+    {# 記事がない場合のプレースホルダー #}
+    {% for i in range(3) %}
+    <div class="bg-white rounded-2xl border border-gray-100 overflow-hidden">
+      <div class="aspect-video bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center">
+        <span class="text-4xl">📝</span>
+      </div>
+      <div class="p-4">
+        <div class="h-4 bg-gray-200 rounded mb-2 w-1/3"></div>
+        <div class="h-5 bg-gray-200 rounded mb-1"></div>
+        <div class="h-5 bg-gray-200 rounded w-4/5"></div>
+      </div>
+    </div>
+    {% endfor %}
+    {% endfor %}
+  </div>
+</section>
+
+
+{# ────────────────────────────────────────
+   7. CTA バナー
+──────────────────────────────────────── #}
+<section class="bg-gray-900 py-12">
+  <div class="max-w-4xl mx-auto px-4 text-center">
+    <h2 class="text-xl sm:text-2xl font-bold text-white mb-2">
+      まずは給付金対象講座を検索してみよう
+    </h2>
+    <p class="text-gray-400 text-sm mb-6">
+      あなたの目標・エリアに合った講座がきっと見つかります
+    </p>
+    <div class="flex flex-col sm:flex-row gap-3 justify-center">
+      <a href="/search/"
+         class="bg-accent hover:bg-accent-dark text-white font-bold px-8 py-3.5 rounded-xl transition-colors shadow-lg">
+        講座を無料で検索する
+      </a>
+      <a href="/about-kyufu/"
+         class="bg-white/10 hover:bg-white/20 text-white font-medium px-8 py-3.5 rounded-xl transition-colors border border-white/20">
+        給付金の仕組みを知る
+      </a>
+    </div>
+  </div>
+</section>
+
+{% endblock %}
+
+
+{# ════════════════════════════════════════
+   ページ固有JavaScript
+════════════════════════════════════════ #}
+{% block scripts %}
+<script>
+  // 給付金シミュレーター
+  function simulate() {
+    const price = parseInt(document.getElementById('sim-price').value, 10) || 0;
+
+    // 一般: 20% 上限10万
+    const generalBenefit = Math.min(Math.round(price * 0.2), 100000);
+    const generalAfter   = price - generalBenefit;
+
+    // 特定一般: 40% 上限20万
+    const tokuteBenefit  = Math.min(Math.round(price * 0.4), 200000);
+    const tokuteAfter    = price - tokuteBenefit;
+
+    // 専門実践: 70% 上限224万
+    const senmonBenefit  = Math.min(Math.round(price * 0.7), 2240000);
+    const senmonAfter    = price - senmonBenefit;
+
+    const fmt = v => '¥' + v.toLocaleString('ja-JP');
+    document.getElementById('result-general').textContent = fmt(generalAfter);
+    document.getElementById('result-tokutei').textContent = fmt(tokuteAfter);
+    document.getElementById('result-senmon').textContent  = fmt(senmonAfter);
+  }
+
+  // 初期計算
+  simulate();
+</script>
+{% endblock %}

@@ -1,0 +1,251 @@
+{% extends "base.html" %}
+
+{% block title %}{{ category.name }}の給付金対象講座一覧｜資格バンク{% endblock %}
+{% block description %}{{ category.description }}教育訓練給付金で最大70%OFFになる{{ category.name }}講座を比較。{% endblock %}
+
+{% block ogp %}
+<meta property="og:type"        content="website">
+<meta property="og:title"       content="{{ category.name }}の給付金対象講座一覧｜資格バンク">
+<meta property="og:description" content="{{ category.description }}">
+<meta property="og:url"         content="{{ site_url }}/category/{{ category.slug }}/">
+<meta property="og:image"       content="{{ site_url }}/static/images/og-default.png">
+<meta property="og:site_name"   content="資格バンク">
+<meta property="og:locale"      content="ja_JP">
+<meta name="twitter:card"       content="summary_large_image">
+{% endblock %}
+
+{% block jsonld %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "CollectionPage",
+  "name": "{{ category.name }}の給付金対象講座一覧",
+  "description": "{{ category.description }}",
+  "url": "{{ site_url }}/category/{{ category.slug }}/",
+  "isPartOf": { "@id": "{{ site_url }}/#website" }
+}
+</script>
+{% endblock %}
+
+{% block content %}
+
+{# ── ページヘッダー ── #}
+<section class="bg-gradient-to-br from-primary-800 to-primary-600 py-10">
+  <div class="max-w-6xl mx-auto px-4">
+    <div class="flex items-center gap-3 mb-3">
+      <span class="text-4xl">{{ category.icon }}</span>
+      <h1 class="text-2xl sm:text-3xl font-black text-white">{{ category.name }}</h1>
+    </div>
+    <p class="text-primary-100 text-sm max-w-xl">{{ category.description }}</p>
+    <div class="flex items-center gap-3 mt-4">
+      <span class="bg-white/20 text-white text-xs font-semibold px-3 py-1 rounded-full">
+        {{ courses | length }} 件の講座
+      </span>
+      <span class="bg-white/20 text-white text-xs font-semibold px-3 py-1 rounded-full">
+        教育訓練給付金対象
+      </span>
+    </div>
+  </div>
+</section>
+
+{# ── コンテンツ ── #}
+<div class="max-w-6xl mx-auto px-4 py-10">
+  <div class="flex flex-col lg:flex-row gap-8">
+
+    {# ── サイドバー（フィルター）── #}
+    <aside class="lg:w-56 shrink-0">
+      <div class="bg-white rounded-2xl border border-gray-100 p-5 sticky top-20">
+        <p class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3">給付金種別</p>
+        <div class="space-y-2">
+          <label class="flex items-center gap-2 cursor-pointer">
+            <input type="radio" name="benefit" value="all" class="accent-primary-600" checked
+                   onchange="filterCourses(this.value)">
+            <span class="text-sm text-gray-700">すべて</span>
+          </label>
+          <label class="flex items-center gap-2 cursor-pointer">
+            <input type="radio" name="benefit" value="専門実践" class="accent-primary-600"
+                   onchange="filterCourses(this.value)">
+            <span class="text-sm text-gray-700">専門実践（最大70%）</span>
+          </label>
+          <label class="flex items-center gap-2 cursor-pointer">
+            <input type="radio" name="benefit" value="特定一般" class="accent-primary-600"
+                   onchange="filterCourses(this.value)">
+            <span class="text-sm text-gray-700">特定一般（40%）</span>
+          </label>
+          <label class="flex items-center gap-2 cursor-pointer">
+            <input type="radio" name="benefit" value="一般" class="accent-primary-600"
+                   onchange="filterCourses(this.value)">
+            <span class="text-sm text-gray-700">一般（20%）</span>
+          </label>
+        </div>
+
+        <hr class="my-4 border-gray-100">
+
+        <p class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3">受講形式</p>
+        <div class="space-y-2">
+          <label class="flex items-center gap-2 cursor-pointer">
+            <input type="radio" name="format" value="all" class="accent-primary-600" checked
+                   onchange="filterFormat(this.value)">
+            <span class="text-sm text-gray-700">すべて</span>
+          </label>
+          <label class="flex items-center gap-2 cursor-pointer">
+            <input type="radio" name="format" value="オンライン" class="accent-primary-600"
+                   onchange="filterFormat(this.value)">
+            <span class="text-sm text-gray-700">オンライン</span>
+          </label>
+          <label class="flex items-center gap-2 cursor-pointer">
+            <input type="radio" name="format" value="通学" class="accent-primary-600"
+                   onchange="filterFormat(this.value)">
+            <span class="text-sm text-gray-700">通学</span>
+          </label>
+          <label class="flex items-center gap-2 cursor-pointer">
+            <input type="radio" name="format" value="通信" class="accent-primary-600"
+                   onchange="filterFormat(this.value)">
+            <span class="text-sm text-gray-700">通信</span>
+          </label>
+        </div>
+
+        <hr class="my-4 border-gray-100">
+
+        <p class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3">並び替え</p>
+        <select onchange="sortCourses(this.value)"
+                class="w-full text-sm border border-gray-200 rounded-lg px-3 py-2 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-primary-500">
+          <option value="benefit_rate">給付率（高い順）</option>
+          <option value="price_after_benefit">実質負担（安い順）</option>
+          <option value="price">受講料（安い順）</option>
+        </select>
+      </div>
+    </aside>
+
+    {# ── 講座リスト ── #}
+    <div class="flex-1">
+      <div id="course-count" class="text-sm text-gray-500 mb-4">{{ courses | length }}件 表示中</div>
+      <div id="course-list" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        {% for course in courses %}
+        <a href="/course/{{ course.id }}/"
+           class="course-card group bg-white rounded-2xl border border-gray-100 p-5
+                  hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 flex flex-col"
+           data-benefit="{{ course.benefit_type }}"
+           data-format="{{ course.format }}"
+           data-rate="{{ course.benefit_rate }}"
+           data-price="{{ course.price_after_benefit or 9999999 }}"
+           data-raw-price="{{ course.price or 9999999 }}">
+
+          <div class="flex items-center gap-2 mb-3">
+            {% if course.benefit_type == "専門実践" %}
+            <span class="bg-red-500 text-white text-xs font-bold px-2.5 py-1 rounded-full">専門実践</span>
+            {% elif course.benefit_type == "特定一般" %}
+            <span class="bg-orange-500 text-white text-xs font-bold px-2.5 py-1 rounded-full">特定一般</span>
+            {% else %}
+            <span class="bg-primary-600 text-white text-xs font-bold px-2.5 py-1 rounded-full">一般</span>
+            {% endif %}
+            <span class="text-xs text-gray-400">{{ course.format }}</span>
+          </div>
+
+          <h2 class="text-sm font-bold text-gray-900 line-clamp-2 group-hover:text-primary-600
+                     transition-colors mb-1 flex-1">
+            {{ course.name }}
+          </h2>
+          <p class="text-xs text-gray-500 mb-3">{{ course.school_name }}</p>
+
+          {% if course.target_qualification %}
+          <p class="text-xs text-primary-700 bg-primary-50 rounded-lg px-3 py-1.5 mb-3">
+            🎯 {{ course.target_qualification }}
+          </p>
+          {% endif %}
+
+          <div class="border-t border-gray-100 pt-3 mt-auto">
+            <div class="flex items-baseline justify-between">
+              <div>
+                {% if course.price %}
+                <p class="text-xs text-gray-400 line-through">¥{{ "{:,}".format(course.price) }}</p>
+                {% endif %}
+                {% if course.price_after_benefit %}
+                <p class="text-xl font-black text-accent">
+                  ¥{{ "{:,}".format(course.price_after_benefit) }}<span class="text-xs font-normal text-gray-500">〜</span>
+                </p>
+                {% endif %}
+              </div>
+              <span class="bg-accent/10 text-accent font-bold text-sm px-2.5 py-1 rounded-full">
+                {{ course.benefit_rate }}%OFF
+              </span>
+            </div>
+            {% if course.duration %}
+            <p class="text-xs text-gray-400 mt-1">期間: {{ course.duration }}</p>
+            {% endif %}
+          </div>
+        </a>
+        {% else %}
+        <div class="col-span-2 text-center py-16 text-gray-400">
+          <p class="text-4xl mb-3">🔍</p>
+          <p class="font-medium">このカテゴリの講座はまだ登録されていません。</p>
+        </div>
+        {% endfor %}
+      </div>
+      <div id="no-result" class="hidden text-center py-16 text-gray-400">
+        <p class="text-4xl mb-3">🔍</p>
+        <p class="font-medium">条件に合う講座が見つかりませんでした。</p>
+      </div>
+    </div>
+  </div>
+
+  {# ── 他カテゴリへのリンク ── #}
+  <section class="mt-14">
+    <h2 class="text-lg font-bold text-gray-900 mb-4">他のカテゴリを見る</h2>
+    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+      {% for cat in nav_categories if cat.slug != category.slug %}
+      <a href="/category/{{ cat.slug }}/"
+         class="flex items-center gap-2 bg-white border border-gray-100 rounded-xl px-4 py-3
+                text-sm font-medium text-gray-700 hover:bg-primary-50 hover:text-primary-700
+                hover:border-primary-200 transition-all">
+        <span>{{ cat.icon }}</span>{{ cat.name }}
+      </a>
+      {% endfor %}
+    </div>
+  </section>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+  let currentBenefit = 'all';
+  let currentFormat  = 'all';
+  let currentSort    = 'benefit_rate';
+
+  function applyFilters() {
+    const cards = document.querySelectorAll('.course-card');
+    let visible = 0;
+    cards.forEach(card => {
+      const b = card.dataset.benefit;
+      const f = card.dataset.format;
+      const matchBenefit = currentBenefit === 'all' || b === currentBenefit;
+      const matchFormat  = currentFormat  === 'all' || f.includes(currentFormat);
+      const show = matchBenefit && matchFormat;
+      card.parentElement.style.display = show ? '' : 'none';
+      if (show) visible++;
+    });
+    document.getElementById('course-count').textContent = `${visible}件 表示中`;
+    document.getElementById('no-result').classList.toggle('hidden', visible > 0);
+    document.getElementById('course-list').classList.toggle('hidden', visible === 0);
+  }
+
+  function filterCourses(val) { currentBenefit = val; applyFilters(); }
+  function filterFormat(val)  { currentFormat  = val; applyFilters(); }
+
+  function sortCourses(val) {
+    currentSort = val;
+    const list  = document.getElementById('course-list');
+    const items = [...list.querySelectorAll('.course-card')].map(c => c.parentElement);
+    items.sort((a, b) => {
+      const ca = a.querySelector('.course-card');
+      const cb = b.querySelector('.course-card');
+      if (val === 'benefit_rate')      return parseInt(cb.dataset.rate)  - parseInt(ca.dataset.rate);
+      if (val === 'price_after_benefit') return parseInt(ca.dataset.price) - parseInt(cb.dataset.price);
+      if (val === 'price')             return parseInt(ca.dataset.rawPrice) - parseInt(cb.dataset.rawPrice);
+      return 0;
+    });
+    items.forEach(el => list.appendChild(el));
+  }
+</script>
+{% endblock %}

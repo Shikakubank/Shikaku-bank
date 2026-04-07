@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="ja" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  {# ── タイトル・メタ ── #}
+  <title>{% block title %}{{ page.title }} | 資格バンク{% endblock %}</title>
+  <meta name="description" content="{% block description %}{{ page.description }}{% endblock %}">
+  <meta name="robots" content="{{ page.robots | default('index, follow') }}">
+  <link rel="canonical" href="{{ site_url }}{{ page.canonical | default('') }}">
+
+  {# ── OGP ── #}
+  {% block ogp %}
+  <meta property="og:type"        content="{{ page.og_type | default('website') }}">
+  <meta property="og:title"       content="{{ page.title }} | 資格バンク">
+  <meta property="og:description" content="{{ page.description }}">
+  <meta property="og:url"         content="{{ site_url }}{{ page.canonical | default('') }}">
+  <meta property="og:image"       content="{{ site_url }}/static/images/{{ page.og_image | default('og-default.png') }}">
+  <meta property="og:site_name"   content="資格バンク">
+  <meta property="og:locale"      content="ja_JP">
+  <meta name="twitter:card"       content="summary_large_image">
+  <meta name="twitter:title"      content="{{ page.title }} | 資格バンク">
+  <meta name="twitter:description" content="{{ page.description }}">
+  <meta name="twitter:image"      content="{{ site_url }}/static/images/{{ page.og_image | default('og-default.png') }}">
+  {% endblock %}
+
+  {# ── JSON-LD ── #}
+  {% block jsonld %}{% endblock %}
+
+  {# ── Google Fonts ── #}
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600;700;900&display=swap" rel="stylesheet">
+
+  {# ── Tailwind CSS CDN ── #}
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Noto Sans JP"', 'sans-serif'],
+          },
+          colors: {
+            primary: {
+              50:  '#EFF6FF',
+              100: '#DBEAFE',
+              200: '#BFDBFE',
+              300: '#93C5FD',
+              400: '#60A5FA',
+              500: '#3B82F6',
+              600: '#2563EB',
+              700: '#1D4ED8',
+              800: '#1E40AF',
+              900: '#1E3A8A',
+            },
+            accent: {
+              DEFAULT: '#F97316',
+              light:   '#FED7AA',
+              dark:    '#EA580C',
+            },
+          },
+        },
+      },
+    }
+  </script>
+
+  {# ── サイト共通スタイル ── #}
+  <style>
+    body { font-family: 'Noto Sans JP', sans-serif; }
+    .line-clamp-2 {
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+    .line-clamp-3 {
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+  </style>
+
+  {# ── Google Analytics ── #}
+  {% if ga_id %}
+  <script async src="https://www.googletagmanager.com/gtag/js?id={{ ga_id }}"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', '{{ ga_id }}');
+  </script>
+  {% endif %}
+
+  {% block head_extra %}{% endblock %}
+</head>
+
+<body class="bg-gray-50 text-gray-800 antialiased">
+
+  {# ════════════════════════════════════════
+     ヘッダー
+  ════════════════════════════════════════ #}
+  <header class="bg-white shadow-sm sticky top-0 z-50">
+    <div class="max-w-6xl mx-auto px-4">
+      <div class="flex items-center justify-between h-16">
+
+        {# ロゴ #}
+        <a href="/" class="flex items-center gap-2 shrink-0">
+          <span class="text-2xl font-black text-primary-600 tracking-tight leading-none">
+            資格<span class="text-accent">バンク</span>
+          </span>
+          <span class="hidden sm:inline-block text-xs text-gray-400 font-normal leading-tight">
+            給付金対象<br>講座ナビ
+          </span>
+        </a>
+
+        {# デスクトップナビ #}
+        <nav class="hidden md:flex items-center gap-1" aria-label="グローバルナビゲーション">
+          <div class="relative group">
+            <button class="flex items-center gap-1 px-3 py-2 text-sm font-medium text-gray-600 hover:text-primary-600 rounded-md hover:bg-primary-50 transition-colors">
+              カテゴリ
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+            </button>
+            <div class="absolute top-full left-0 mt-1 w-56 bg-white rounded-xl shadow-lg border border-gray-100 py-1 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+              {% for cat in nav_categories %}
+              <a href="/category/{{ cat.slug }}/" class="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-primary-50 hover:text-primary-700 transition-colors">
+                <span class="text-lg">{{ cat.icon }}</span>{{ cat.name }}
+              </a>
+              {% endfor %}
+            </div>
+          </div>
+
+          <div class="relative group">
+            <button class="flex items-center gap-1 px-3 py-2 text-sm font-medium text-gray-600 hover:text-primary-600 rounded-md hover:bg-primary-50 transition-colors">
+              エリア
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+            </button>
+            <div class="absolute top-full left-0 mt-1 w-48 bg-white rounded-xl shadow-lg border border-gray-100 py-1 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+              <a href="/area/online/" class="flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 hover:bg-primary-50 hover:text-primary-700 font-medium">🖥️ オンライン</a>
+              <div class="border-t border-gray-100 my-1"></div>
+              {% for area in nav_areas[:10] %}
+              <a href="/area/{{ area.slug }}/" class="block px-4 py-2 text-sm text-gray-700 hover:bg-primary-50 hover:text-primary-700">{{ area.name }}</a>
+              {% endfor %}
+              <a href="/area/" class="block px-4 py-2.5 text-sm text-primary-600 font-medium hover:bg-primary-50">すべてのエリア →</a>
+            </div>
+          </div>
+
+          <a href="/articles/" class="px-3 py-2 text-sm font-medium text-gray-600 hover:text-primary-600 rounded-md hover:bg-primary-50 transition-colors">コラム</a>
+          <a href="/about-kyufu/" class="px-3 py-2 text-sm font-medium text-gray-600 hover:text-primary-600 rounded-md hover:bg-primary-50 transition-colors">給付金とは</a>
+        </nav>
+
+        {# CTA（デスクトップ）#}
+        <a href="/search/" class="hidden md:inline-flex items-center gap-1.5 bg-primary-600 hover:bg-primary-700 text-white text-sm font-semibold px-4 py-2 rounded-lg transition-colors shadow-sm">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+          講座を探す
+        </a>
+
+        {# ハンバーガー（モバイル）#}
+        <button id="menu-btn" class="md:hidden p-2 rounded-md text-gray-500 hover:bg-gray-100" aria-label="メニューを開く">
+          <svg id="menu-icon-open"  class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+          <svg id="menu-icon-close" class="w-6 h-6 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+      </div>
+    </div>
+
+    {# モバイルメニュー #}
+    <div id="mobile-menu" class="hidden md:hidden border-t border-gray-100 bg-white">
+      <div class="px-4 py-3 space-y-1">
+        <p class="text-xs text-gray-400 font-semibold uppercase tracking-wider px-2 pb-1">カテゴリ</p>
+        {% for cat in nav_categories %}
+        <a href="/category/{{ cat.slug }}/" class="flex items-center gap-3 px-2 py-2.5 text-sm text-gray-700 hover:bg-primary-50 rounded-lg">
+          <span>{{ cat.icon }}</span>{{ cat.name }}
+        </a>
+        {% endfor %}
+        <div class="border-t border-gray-100 my-2"></div>
+        <a href="/area/" class="flex items-center gap-2 px-2 py-2.5 text-sm text-gray-700 hover:bg-primary-50 rounded-lg">🗾 エリアから探す</a>
+        <a href="/articles/" class="flex items-center gap-2 px-2 py-2.5 text-sm text-gray-700 hover:bg-primary-50 rounded-lg">📝 コラム</a>
+        <a href="/about-kyufu/" class="flex items-center gap-2 px-2 py-2.5 text-sm text-gray-700 hover:bg-primary-50 rounded-lg">💡 給付金とは</a>
+        <div class="pt-2">
+          <a href="/search/" class="block text-center bg-primary-600 text-white text-sm font-semibold px-4 py-3 rounded-lg">講座を探す</a>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  {# ════════════════════════════════════════
+     パンくずナビ
+  ════════════════════════════════════════ #}
+  {% block breadcrumb %}
+  {% if breadcrumbs and breadcrumbs|length > 1 %}
+  <nav class="bg-white border-b border-gray-100" aria-label="パンくずナビ">
+    <div class="max-w-6xl mx-auto px-4 py-2">
+      <ol class="flex flex-wrap items-center gap-1 text-sm text-gray-500">
+        {% for crumb in breadcrumbs %}
+        <li class="flex items-center gap-1">
+          {% if not loop.last %}
+            <a href="{{ crumb.url }}" class="hover:text-primary-600 transition-colors">{{ crumb.name }}</a>
+            <svg class="w-3.5 h-3.5 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+          {% else %}
+            <span class="text-gray-700 font-medium truncate max-w-xs">{{ crumb.name }}</span>
+          {% endif %}
+        </li>
+        {% endfor %}
+      </ol>
+    </div>
+  </nav>
+  {% endif %}
+  {% endblock %}
+
+  {# ════════════════════════════════════════
+     メインコンテンツ
+  ════════════════════════════════════════ #}
+  <main>
+    {% block content %}{% endblock %}
+  </main>
+
+  {# ════════════════════════════════════════
+     フッター
+  ════════════════════════════════════════ #}
+  <footer class="bg-gray-900 text-gray-300 mt-16">
+    <div class="max-w-6xl mx-auto px-4 py-12">
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-8 mb-10">
+
+        {# サイト概要 #}
+        <div class="col-span-2 md:col-span-1">
+          <p class="text-xl font-black text-white mb-2">
+            資格<span class="text-accent">バンク</span>
+          </p>
+          <p class="text-sm text-gray-400 leading-relaxed">
+            教育訓練給付金の対象講座を<br>かんたんに比較・検索できるメディアです。
+          </p>
+        </div>
+
+        {# カテゴリリンク #}
+        <div>
+          <p class="text-sm font-semibold text-white mb-3">カテゴリ</p>
+          <ul class="space-y-2">
+            {% for cat in nav_categories %}
+            <li><a href="/category/{{ cat.slug }}/" class="text-sm text-gray-400 hover:text-white transition-colors">{{ cat.name }}</a></li>
+            {% endfor %}
+          </ul>
+        </div>
+
+        {# サポートリンク #}
+        <div>
+          <p class="text-sm font-semibold text-white mb-3">サポート</p>
+          <ul class="space-y-2">
+            <li><a href="/about-kyufu/" class="text-sm text-gray-400 hover:text-white transition-colors">教育訓練給付金とは</a></li>
+            <li><a href="/articles/" class="text-sm text-gray-400 hover:text-white transition-colors">コラム一覧</a></li>
+            <li><a href="/area/" class="text-sm text-gray-400 hover:text-white transition-colors">エリアから探す</a></li>
+            <li><a href="/sitemap.xml" class="text-sm text-gray-400 hover:text-white transition-colors">サイトマップ</a></li>
+          </ul>
+        </div>
+
+        {# 運営者情報 #}
+        <div>
+          <p class="text-sm font-semibold text-white mb-3">運営情報</p>
+          <ul class="space-y-2">
+            <li><a href="/about/" class="text-sm text-gray-400 hover:text-white transition-colors">運営者情報</a></li>
+            <li><a href="/privacy/" class="text-sm text-gray-400 hover:text-white transition-colors">プライバシーポリシー</a></li>
+            <li><a href="/disclaimer/" class="text-sm text-gray-400 hover:text-white transition-colors">免責事項</a></li>
+            <li><a href="/contact/" class="text-sm text-gray-400 hover:text-white transition-colors">お問い合わせ</a></li>
+          </ul>
+        </div>
+      </div>
+
+      {# 免責事項テキスト #}
+      <div class="border-t border-gray-700 pt-6 mb-6">
+        <p class="text-xs text-gray-500 leading-relaxed">
+          当サイトに掲載している情報は、各スクール公式サイト等をもとに独自に調査・作成したものです。
+          受講料・給付金の詳細・最新情報は必ず各スクールの公式サイトでご確認ください。
+          当サイトは一部のリンクにアフィリエイト広告を含みます。
+          教育訓練給付金の受給には、雇用保険の加入期間等の要件があります。
+          詳細はお近くのハローワークにお問い合わせください。
+        </p>
+      </div>
+
+      <div class="flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-gray-500">
+        <p>© {{ current_year }} 資格バンク All Rights Reserved.</p>
+        <p>厚生労働省の教育訓練給付金制度に基づく情報を掲載しています。</p>
+      </div>
+    </div>
+  </footer>
+
+  {# ════════════════════════════════════════
+     共通JavaScript
+  ════════════════════════════════════════ #}
+  <script>
+    // モバイルメニュー開閉
+    const menuBtn  = document.getElementById('menu-btn');
+    const mobileMenu = document.getElementById('mobile-menu');
+    const iconOpen   = document.getElementById('menu-icon-open');
+    const iconClose  = document.getElementById('menu-icon-close');
+
+    menuBtn.addEventListener('click', () => {
+      const isOpen = !mobileMenu.classList.contains('hidden');
+      mobileMenu.classList.toggle('hidden', isOpen);
+      iconOpen.classList.toggle('hidden', !isOpen);
+      iconClose.classList.toggle('hidden', isOpen);
+    });
+  </script>
+
+  {% block scripts %}{% endblock %}
+</body>
+</html>

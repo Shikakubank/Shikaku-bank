@@ -1,0 +1,209 @@
+{% extends "base.html" %}
+
+{% set benefit_label = {
+  "専門実践": "専門実践教育訓練（最大70%給付）",
+  "特定一般": "特定一般教育訓練（40%給付）",
+  "一般":     "一般教育訓練（20%給付）"
+} %}
+
+{% block title %}{{ course.name }}｜{{ school.name }}【給付金で{{ course.benefit_rate }}%OFF】｜資格バンク{% endblock %}
+{% block description %}{{ school.name }}「{{ course.name }}」の詳細。受講料¥{{ "{:,}".format(course.price) }}が教育訓練給付金で実質¥{{ "{:,}".format(course.price_after_benefit) }}〜。{{ course.field }}分野・{{ course.format }}・{{ course.duration }}。{% endblock %}
+
+{% block ogp %}
+<meta property="og:type"        content="article">
+<meta property="og:title"       content="{{ course.name }}｜{{ school.name }}【{{ course.benefit_rate }}%OFF】">
+<meta property="og:description" content="受講料¥{{ "{:,}".format(course.price) }}が給付金で実質¥{{ "{:,}".format(course.price_after_benefit) }}〜。">
+<meta property="og:url"         content="{{ site_url }}/course/{{ course.id }}/">
+<meta property="og:image"       content="{{ site_url }}/static/images/og-default.png">
+<meta property="og:site_name"   content="資格バンク">
+<meta property="og:locale"      content="ja_JP">
+<meta name="twitter:card"       content="summary_large_image">
+{% endblock %}
+
+{% block jsonld %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Course",
+  "name": "{{ course.name }}",
+  "description": "{{ course.target_qualification }}を目指す{{ course.field }}分野の講座。{{ course.duration }}・{{ course.format }}。",
+  "provider": {
+    "@type": "Organization",
+    "name": "{{ school.name }}",
+    "url": "{{ school.url }}"
+  },
+  "url": "{{ site_url }}/course/{{ course.id }}/",
+  "offers": {
+    "@type": "Offer",
+    "price": "{{ course.price_after_benefit }}",
+    "priceCurrency": "JPY"
+  }
+}
+</script>
+{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto px-4 py-8">
+
+  {# ── メインカード ── #}
+  <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden mb-6">
+
+    {# カラーヘッダー #}
+    <div class="{% if course.benefit_type == '専門実践' %}bg-gradient-to-r from-red-600 to-red-500
+                {% elif course.benefit_type == '特定一般' %}bg-gradient-to-r from-orange-500 to-orange-400
+                {% else %}bg-gradient-to-r from-primary-700 to-primary-600{% endif %} p-6">
+      <div class="flex flex-wrap items-center gap-2 mb-3">
+        {% if course.benefit_type == "専門実践" %}
+        <span class="bg-white/25 text-white text-xs font-bold px-3 py-1 rounded-full">専門実践</span>
+        {% elif course.benefit_type == "特定一般" %}
+        <span class="bg-white/25 text-white text-xs font-bold px-3 py-1 rounded-full">特定一般</span>
+        {% else %}
+        <span class="bg-white/25 text-white text-xs font-bold px-3 py-1 rounded-full">一般</span>
+        {% endif %}
+        <span class="bg-white/20 text-white text-xs px-3 py-1 rounded-full">{{ course.field }}</span>
+        <span class="bg-white/20 text-white text-xs px-3 py-1 rounded-full">{{ course.format }}</span>
+      </div>
+      <h1 class="text-xl sm:text-2xl font-black text-white leading-snug mb-1">{{ course.name }}</h1>
+      <p class="text-white/80 text-sm">{{ school.name }}</p>
+    </div>
+
+    {# 料金ブロック #}
+    <div class="p-6 border-b border-gray-100">
+      <div class="flex flex-col sm:flex-row sm:items-end gap-4">
+        <div class="flex-1">
+          <p class="text-xs text-gray-400 mb-1">通常受講料</p>
+          <p class="text-2xl font-black text-gray-400 line-through">¥{{ "{:,}".format(course.price) }}</p>
+        </div>
+        <div class="text-center hidden sm:block text-gray-300 text-2xl font-light">→</div>
+        <div class="flex-1">
+          <p class="text-xs text-gray-500 mb-1">給付金適用後（実質負担）</p>
+          <p class="text-4xl font-black text-accent">
+            ¥{{ "{:,}".format(course.price_after_benefit) }}<span class="text-lg font-normal text-gray-500">〜</span>
+          </p>
+        </div>
+        <div class="shrink-0">
+          <div class="bg-accent/10 text-accent font-black text-2xl px-5 py-3 rounded-2xl text-center">
+            {{ course.benefit_rate }}%<span class="text-base font-semibold">OFF</span>
+          </div>
+        </div>
+      </div>
+      {% if course.notes %}
+      <p class="text-xs text-gray-400 mt-3 bg-gray-50 rounded-lg px-4 py-2">
+        ℹ️ {{ course.notes }}
+      </p>
+      {% endif %}
+    </div>
+
+    {# 詳細情報テーブル #}
+    <div class="p-6">
+      <h2 class="text-sm font-bold text-gray-700 mb-4">講座詳細</h2>
+      <dl class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        {% if course.target_qualification %}
+        <div class="bg-primary-50 rounded-xl p-4 sm:col-span-2">
+          <dt class="text-xs font-semibold text-primary-600 mb-1">取得目標の資格</dt>
+          <dd class="text-sm font-bold text-primary-800">🎯 {{ course.target_qualification }}</dd>
+        </div>
+        {% endif %}
+
+        <div class="bg-gray-50 rounded-xl p-4">
+          <dt class="text-xs text-gray-500 mb-1">給付金種別</dt>
+          <dd class="text-sm font-semibold text-gray-800">{{ benefit_label.get(course.benefit_type, course.benefit_type) }}</dd>
+        </div>
+
+        <div class="bg-gray-50 rounded-xl p-4">
+          <dt class="text-xs text-gray-500 mb-1">受講期間</dt>
+          <dd class="text-sm font-semibold text-gray-800">{{ course.duration or "要確認" }}</dd>
+        </div>
+
+        <div class="bg-gray-50 rounded-xl p-4">
+          <dt class="text-xs text-gray-500 mb-1">受講形式</dt>
+          <dd class="text-sm font-semibold text-gray-800">{{ course.format or "要確認" }}</dd>
+        </div>
+
+        <div class="bg-gray-50 rounded-xl p-4">
+          <dt class="text-xs text-gray-500 mb-1">対応エリア</dt>
+          <dd class="text-sm font-semibold text-gray-800">{{ course.prefecture or "全国" }}</dd>
+        </div>
+
+        <div class="bg-gray-50 rounded-xl p-4">
+          <dt class="text-xs text-gray-500 mb-1">分野</dt>
+          <dd class="text-sm font-semibold text-gray-800">{{ course.field }}</dd>
+        </div>
+      </dl>
+    </div>
+
+    {# CTAボタン #}
+    <div class="px-6 pb-6">
+      <a href="{{ school.affiliate_url or school.url }}"
+         target="_blank" rel="noopener noreferrer sponsored"
+         class="block w-full text-center bg-accent hover:bg-accent-dark text-white font-black
+                text-base py-4 rounded-2xl transition-colors shadow-lg hover:shadow-xl">
+        {{ school.name }} の公式サイトで詳細を見る →
+      </a>
+      <p class="text-center text-xs text-gray-400 mt-2">
+        ※ 受講料・給付金の最新情報は必ず公式サイトでご確認ください
+      </p>
+    </div>
+  </div>
+
+  {# ── 給付金の仕組み ── #}
+  <div class="bg-white rounded-2xl border border-gray-100 p-6 mb-6">
+    <h2 class="text-base font-bold text-gray-900 mb-4">この講座で受け取れる給付金の目安</h2>
+    <div class="grid grid-cols-3 gap-3 text-center text-sm">
+      <div>
+        <p class="text-xs text-gray-500 mb-1">受講料</p>
+        <p class="font-black text-gray-700">¥{{ "{:,}".format(course.price) }}</p>
+      </div>
+      <div>
+        <p class="text-xs text-gray-500 mb-1">給付金（最大）</p>
+        <p class="font-black text-primary-600">
+          ¥{{ "{:,}".format(course.price - course.price_after_benefit) }}
+        </p>
+      </div>
+      <div>
+        <p class="text-xs text-gray-500 mb-1">実質負担</p>
+        <p class="font-black text-accent">¥{{ "{:,}".format(course.price_after_benefit) }}</p>
+      </div>
+    </div>
+    <p class="text-xs text-gray-400 mt-4 text-center">
+      ※給付金を受け取るには雇用保険の加入期間等の要件があります。
+      <a href="/about-kyufu/" class="text-primary-600 hover:underline">詳しくはこちら</a>
+    </p>
+  </div>
+
+  {# ── 関連講座 ── #}
+  {% if related_courses %}
+  <section>
+    <h2 class="text-base font-bold text-gray-900 mb-4">同じカテゴリの関連講座</h2>
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      {% for rc in related_courses[:4] %}
+      <a href="/course/{{ rc.id }}/"
+         class="group bg-white rounded-2xl border border-gray-100 p-4
+                hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 flex flex-col">
+        <div class="flex items-center gap-2 mb-2">
+          {% if rc.benefit_type == "専門実践" %}
+          <span class="bg-red-500 text-white text-xs font-bold px-2 py-0.5 rounded-full">専門実践</span>
+          {% elif rc.benefit_type == "特定一般" %}
+          <span class="bg-orange-500 text-white text-xs font-bold px-2 py-0.5 rounded-full">特定一般</span>
+          {% else %}
+          <span class="bg-primary-600 text-white text-xs font-bold px-2 py-0.5 rounded-full">一般</span>
+          {% endif %}
+          <span class="text-xs text-gray-400">{{ rc.format }}</span>
+        </div>
+        <h3 class="text-sm font-bold text-gray-900 line-clamp-2 group-hover:text-primary-600 flex-1 mb-1">
+          {{ rc.name }}
+        </h3>
+        <p class="text-xs text-gray-500 mb-2">{{ rc.school_name }}</p>
+        {% if rc.price_after_benefit %}
+        <p class="text-base font-black text-accent">
+          ¥{{ "{:,}".format(rc.price_after_benefit) }}<span class="text-xs font-normal text-gray-400">〜</span>
+          <span class="text-xs font-bold text-accent/80 ml-1">{{ rc.benefit_rate }}%OFF</span>
+        </p>
+        {% endif %}
+      </a>
+      {% endfor %}
+    </div>
+  </section>
+  {% endif %}
+</div>
+{% endblock %}

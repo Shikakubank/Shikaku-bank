@@ -37,9 +37,8 @@ desktop.ini
 *.swp
 *.swo
 
-# 生成物（ローカルビルド確認用、デプロイはGitHub Actionsで行う）
-# output/ は必要に応じてアンコメント
-# output/
+# 生成物（GitHub Actions でビルド・デプロイするためコミット不要）
+output/
 
 # ログ
 *.log
