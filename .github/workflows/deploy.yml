@@ -36,4 +36,3 @@ jobs:
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           projectName: sakuseizumi
           directory: output
-          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
