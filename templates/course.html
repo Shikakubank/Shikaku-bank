@@ -142,14 +142,24 @@
 
     {# CTAボタン #}
     <div class="px-6 pb-6">
-      <a href="{{ school.affiliate_url or school.url }}"
+      {% set cta_url = school.affiliate_url or school.url %}
+      {% if cta_url %}
+      <a href="{{ cta_url }}"
          target="_blank" rel="noopener noreferrer sponsored"
          class="block w-full text-center bg-accent hover:bg-accent-dark text-white font-black
                 text-base py-4 rounded-2xl transition-colors shadow-lg hover:shadow-xl">
         {{ school.name }} の公式サイトで詳細を見る →
       </a>
+      {% else %}
+      <a href="https://www.kyufu.mhlw.go.jp/kensaku/"
+         target="_blank" rel="noopener noreferrer"
+         class="block w-full text-center bg-primary-600 hover:bg-primary-700 text-white font-black
+                text-base py-4 rounded-2xl transition-colors shadow-lg hover:shadow-xl">
+        厚労省 指定講座検索システムで確認する →
+      </a>
+      {% endif %}
       <p class="text-center text-xs text-gray-400 mt-2">
-        ※ 受講料・給付金の最新情報は必ず公式サイトでご確認ください
+        ※ 受講料・給付金の最新情報は各施設またはハローワークでご確認ください
       </p>
     </div>
   </div>
