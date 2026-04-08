@@ -193,6 +193,60 @@
     </p>
   </div>
 
+  {# ── 商業講座（アフィリエイト）── #}
+  {% if commercial_courses %}
+  <section class="mb-6">
+    <div class="bg-gradient-to-r from-primary-50 to-accent/5 rounded-2xl border border-primary-100 p-6">
+      {% if not has_cta_url %}
+      <div class="flex items-center gap-2 mb-1">
+        <span class="bg-accent text-white text-xs font-bold px-2 py-0.5 rounded-full">PR</span>
+        <h2 class="text-base font-bold text-gray-900">この資格をオンラインで取得する</h2>
+      </div>
+      <p class="text-xs text-gray-500 mb-4">給付金対応スクールで効率よく取得を目指しましょう</p>
+      {% else %}
+      <div class="flex items-center gap-2 mb-1">
+        <span class="bg-accent text-white text-xs font-bold px-2 py-0.5 rounded-full">PR</span>
+        <h2 class="text-base font-bold text-gray-900">この分野の他のオンライン講座と比べる</h2>
+      </div>
+      <p class="text-xs text-gray-500 mb-4">給付金対応の人気スクールを一覧でチェック</p>
+      {% endif %}
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        {% for cc in commercial_courses %}
+        {% set cc_url = cc.school_affiliate_url or cc.school_url %}
+        <a href="{{ cc_url }}"
+           target="_blank" rel="noopener noreferrer sponsored"
+           class="group bg-white rounded-xl border border-gray-100 p-4
+                  hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 flex flex-col">
+          <div class="flex items-center gap-2 mb-2">
+            {% if cc.benefit_type == "専門実践" %}
+            <span class="bg-red-500 text-white text-xs font-bold px-2 py-0.5 rounded-full">専門実践</span>
+            {% elif cc.benefit_type == "特定一般" %}
+            <span class="bg-orange-500 text-white text-xs font-bold px-2 py-0.5 rounded-full">特定一般</span>
+            {% else %}
+            <span class="bg-primary-600 text-white text-xs font-bold px-2 py-0.5 rounded-full">一般</span>
+            {% endif %}
+            <span class="text-xs font-bold text-accent">{{ cc.benefit_rate }}%OFF</span>
+          </div>
+          <p class="text-xs text-gray-400 mb-1">{{ cc.school_name }}</p>
+          <h3 class="text-sm font-bold text-gray-900 line-clamp-2 group-hover:text-primary-600 flex-1 mb-2">
+            {{ cc.name }}
+          </h3>
+          {% if cc.price_after_benefit %}
+          <p class="text-base font-black text-accent mb-2">
+            ¥{{ "{:,}".format(cc.price_after_benefit) }}<span class="text-xs font-normal text-gray-400">〜</span>
+          </p>
+          {% endif %}
+          <span class="block text-center bg-accent text-white text-xs font-bold py-2 rounded-lg
+                       group-hover:bg-accent-dark transition-colors">
+            公式サイトで詳細を見る →
+          </span>
+        </a>
+        {% endfor %}
+      </div>
+    </div>
+  </section>
+  {% endif %}
+
   {# ── 関連講座 ── #}
   {% if related_courses %}
   <section>
