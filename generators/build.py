@@ -318,7 +318,15 @@ def load_articles() -> list[dict]:
 def build_top(env: Environment, conn: sqlite3.Connection, articles: list[dict]) -> list[str]:
     all_courses = fetch_courses(conn)
     total_courses = len(all_courses)
-    pickup = all_courses[:6]
+    # アフィリエイトURLがある講座を優先し、分野が偏らないよう各分野から1件ずつ選ぶ
+    _seen_fields: set[str] = set()
+    pickup: list[dict] = []
+    for c in all_courses:
+        if (c.get("school_affiliate_url") or c.get("school_url")) and c["field"] not in _seen_fields:
+            pickup.append(c)
+            _seen_fields.add(c["field"])
+            if len(pickup) >= 6:
+                break
 
     # カテゴリ別の実件数を集計
     cat_count: dict[str, int] = {cat["slug"]: 0 for cat in CATEGORIES}
@@ -458,6 +466,14 @@ def build_courses(env: Environment, conn: sqlite3.Connection) -> list[str]:
     all_courses = fetch_courses(conn)
     pages = []
 
+    # アフィリエイト収益が取れる商業スクール講座を分野別にインデックス化
+    # (school_url または school_affiliate_url が存在するもの)
+    commercial_by_field: dict[str, list[dict]] = {}
+    for c in all_courses:
+        if c.get("school_url") or c.get("school_affiliate_url"):
+            field = c["field"]
+            commercial_by_field.setdefault(field, []).append(c)
+
     for course in all_courses:
         school = fetch_school(conn, course["school_id"])
         # 同フィールドの関連講座（自分を除く、最大4件）
@@ -466,9 +482,18 @@ def build_courses(env: Environment, conn: sqlite3.Connection) -> list[str]:
             if c["field"] == course["field"] and c["id"] != course["id"]
         ][:4]
 
+        # 同分野の商業スクール講座（現スクールを除く、最大4件）
+        # URL無しページの収益化に使う
+        commercial = [
+            c for c in commercial_by_field.get(course["field"], [])
+            if c["school_id"] != course["school_id"] and c["id"] != course["id"]
+        ][:4]
+
         # カテゴリslugを特定してパンくず構築
         cat_slug = FIELD_TO_CATEGORY.get(course["field"], "")
         cat_name = next((c["name"] for c in CATEGORIES if c["slug"] == cat_slug), "講座一覧")
+
+        has_cta_url = bool(school and (school.get("affiliate_url") or school.get("url")))
 
         ctx = base_ctx()
         ctx.update({
@@ -483,9 +508,11 @@ def build_courses(env: Environment, conn: sqlite3.Connection) -> list[str]:
                 ),
                 "canonical": f"/course/{course['id']}/",
             },
-            "course":          course,
-            "school":          school,
-            "related_courses": related,
+            "course":             course,
+            "school":             school,
+            "related_courses":    related,
+            "commercial_courses": commercial,
+            "has_cta_url":        has_cta_url,
             "breadcrumbs": [
                 {"name": "トップ",  "url": "/"},
                 {"name": cat_name,  "url": f"/category/{cat_slug}/"},
